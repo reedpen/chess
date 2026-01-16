@@ -10,8 +10,9 @@ public class ChessPosition {
     private final int row;
     private final int col;
     public ChessPosition(int row, int col) {
-        this.row = row-1;
-        this.col = col-1;
+        // subtract one to convert from chess position to array indexing
+        this.row = row;
+        this.col = col;
     }
 
     /**
