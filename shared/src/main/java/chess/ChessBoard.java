@@ -16,6 +16,27 @@ public class ChessBoard {
         // Create 8*8 empty board to populate with pieces
         this.Board = new ChessPiece[8][8];
     }
+    @Override
+    public String toString() {
+        return "ChessBoard{" +
+                "Board=" + Arrays.toString(Board) +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessBoard that = (ChessBoard) o;
+        return Objects.deepEquals(Board, that.Board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(Board);
+    }
 
     /**
      * Adds a chess piece to the chessboard
@@ -47,27 +68,6 @@ public class ChessBoard {
         setPawns();
     }
 
-    @Override
-    public String toString() {
-        return "ChessBoard{" +
-                "Board=" + Arrays.toString(Board) +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ChessBoard that = (ChessBoard) o;
-        return Objects.deepEquals(Board, that.Board);
-    }
-
-    @Override
-    public int hashCode() {
-        return Arrays.deepHashCode(Board);
-    }
 
     /**
      * Sets the pawns to their default starting position
@@ -111,7 +111,7 @@ public class ChessBoard {
         }
         for (int i = 0; i<8; i++){
             ChessPiece blackPiece = new ChessPiece(ChessGame.TeamColor.BLACK, PieceRowOrder[i]);
-            ChessPosition pos = new ChessPosition(1, i+1);
+            ChessPosition pos = new ChessPosition(8, i+1);
             addPiece(pos, blackPiece);
         }
     }
