@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 
 /**
@@ -74,5 +75,63 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         throw new RuntimeException("Not implemented");
+    }
+
+    public Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition) {
+
+        HashSet<ChessMove> moves = new HashSet<>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        ChessPiece myPiece = board.getPiece(myPosition);
+        ChessGame.TeamColor color = myPiece.getTeamColor();
+
+        int direction = (color == ChessGame.TeamColor.WHITE) ? 1 : -1;
+        int startRow = (color == ChessGame.TeamColor.WHITE) ? 2 : 7;
+        int promotionRow = (color == ChessGame.TeamColor.WHITE) ? 8 : 1;
+        ChessPosition forwardPos = new ChessPosition(row + direction, col);
+
+        // non capture moves and promotion
+        if (isOnBoard(forwardPos) && board.getPiece(forwardPos) == null) {
+            if (row+direction == promotionRow){
+                addPromotionMoves(moves, myPosition, forwardPos);
+            } else {
+                moves.add(new ChessMove(myPosition, forwardPos, null));
+                ChessPosition doublePos = new ChessPosition(row + (direction*2), col);
+                if (board.getPiece(doublePos) == null && row == startRow){
+                    moves.add(new ChessMove(myPosition, doublePos, null));
+                }
+
+            }
+
+        }
+        int[] captureCols = {col - 1, col + 1};
+
+        for (int capCol : captureCols){
+            ChessPosition capturePos = new ChessPosition(row + direction, capCol);
+            if (isOnBoard(capturePos)) {
+                ChessPiece targetPiece = board.getPiece(capturePos);
+                if (targetPiece != null && targetPiece.getTeamColor() != color) {
+                    if (row + direction == promotionRow){
+                        addPromotionMoves(moves, myPosition, capturePos);
+                    } else {
+                        moves.add(new ChessMove(myPosition, capturePos, null));
+                    }
+
+                }
+            }
+        }
+
+        return moves;
+    }
+
+
+    private boolean isOnBoard(ChessPosition pos) {
+        return pos.getRow() >= 1 && pos.getRow() <= 8 & pos.getColumn() >= 1 && pos.getColumn() <= 8;
+    }
+    private void addPromotionMoves(HashSet<ChessMove> moves, ChessPosition start, ChessPosition end) {
+        moves.add(new ChessMove(start, end, ChessPiece.PieceType.QUEEN));
+        moves.add(new ChessMove(start, end, ChessPiece.PieceType.ROOK));
+        moves.add(new ChessMove(start, end, ChessPiece.PieceType.BISHOP));
+        moves.add(new ChessMove(start, end, ChessPiece.PieceType.KNIGHT));
     }
 }
