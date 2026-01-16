@@ -7,9 +7,11 @@ package chess;
  * signature of the existing methods.
  */
 public class ChessBoard {
+    private ChessPiece[][] Board;
 
     public ChessBoard() {
-        
+        // Create 8*8 empty board to populate with pieces
+        this.Board = new ChessPiece[8][8];
     }
 
     /**
@@ -19,7 +21,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        throw new RuntimeException("Not implemented");
+        Board[position.getArrayRow()][position.getArrayColumn()] = piece;
     }
 
     /**
@@ -30,7 +32,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        throw new RuntimeException("Not implemented");
+        return Board[position.getArrayRow()][position.getArrayColumn()];
     }
 
     /**
@@ -38,6 +40,54 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        setBackRows();
+        setPawns();
+    }
+
+    /**
+     * Sets the pawns to their default starting position
+     */
+    public void setPawns() {
+        // set white pawns
+
+        for (int i = 1; i<9; i++){
+            ChessPiece WhitePawn = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+            ChessPosition pos = new ChessPosition(2, i);
+            addPiece(pos, WhitePawn);
+        }
+        // set black pawns
+
+        for (int i = 1; i<9; i++){
+            ChessPiece BlackPawn = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
+            ChessPosition pos = new ChessPosition(7, i);
+            addPiece(pos, BlackPawn);
+        }
+    }
+
+    /**
+     * Sets the back row of pieces to their default starting position.
+     */
+    public void setBackRows() {
+        ChessPiece.PieceType[] PieceRowOrder = {
+                ChessPiece.PieceType.ROOK,
+                ChessPiece.PieceType.KNIGHT,
+                ChessPiece.PieceType.BISHOP,
+                ChessPiece.PieceType.QUEEN,
+                ChessPiece.PieceType.KING,
+                ChessPiece.PieceType.BISHOP,
+                ChessPiece.PieceType.KNIGHT,
+                ChessPiece.PieceType.ROOK
+        };
+        // add back row of white pieces
+        for (int i = 0; i<8; i++){
+            ChessPiece whitePiece = new ChessPiece(ChessGame.TeamColor.WHITE, PieceRowOrder[i]);
+            ChessPosition pos = new ChessPosition(1, i+1);
+            addPiece(pos, whitePiece);
+        }
+        for (int i = 0; i<8; i++){
+            ChessPiece blackPiece = new ChessPiece(ChessGame.TeamColor.BLACK, PieceRowOrder[i]);
+            ChessPosition pos = new ChessPosition(1, i+1);
+            addPiece(pos, blackPiece);
+        }
     }
 }
