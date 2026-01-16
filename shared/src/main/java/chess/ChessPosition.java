@@ -30,4 +30,22 @@ public class ChessPosition {
     public int getColumn() {
         return col;
     }
+    /**
+     * @return which row this position is in using 0 indexing
+     * 0 codes for the bottom row
+     */
+    public int getArrayRow() {
+        return row-1;
+    }
+
+    /**
+     * @return which column this position is in using 0 indexing
+     * 0 codes for the left row
+     */
+    public int getArrayColumn() {
+        return col-1;
+    }
+
+
+
 }
