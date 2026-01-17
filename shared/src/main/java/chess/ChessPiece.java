@@ -192,6 +192,39 @@ public class ChessPiece {
         return moves;
     }
 
+    public Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition myPosition) {
+        HashSet<ChessMove> moves = new HashSet<>();
+
+        ChessPiece myPiece = board.getPiece(myPosition);
+        ChessGame.TeamColor color = myPiece.getTeamColor();
+        int[][] directions = {{2, 1}, {1, 2}, {-2, 1}, {-1, 2}, {-2, -1}, {-1, -2}, {-2, 1}, {-1, 2}};
+
+        for (int[] dir : directions) {
+            int rowChange = dir[0];
+            int colChange = dir[1];
+
+            int currentRow = myPosition.getRow() + rowChange;
+            int currentCol = myPosition.getColumn() + colChange;
+
+            while (isOnBoard(new ChessPosition(currentRow, currentCol))) {
+                ChessPosition currPos = new ChessPosition(currentRow, currentCol);
+                ChessPiece pieceAtPos = board.getPiece(currPos);
+
+                if (pieceAtPos == null) {
+                    moves.add(new ChessMove(myPosition, currPos, null));
+                } else {
+                    if (pieceAtPos.getTeamColor() != color) {
+                        moves.add(new ChessMove(myPosition, currPos, null));
+                    }
+                    break;
+                }
+
+                currentRow += rowChange;
+                currentCol += colChange;
+            }
+        }
+        return moves;
+    }
 
     public Collection<ChessMove> queenMoves(ChessBoard board, ChessPosition myPosition) {
         HashSet<ChessMove> moves = new HashSet<>();
@@ -200,7 +233,33 @@ public class ChessPiece {
         return moves;
     }
 
+    public Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition myPosition) {
+        HashSet<ChessMove> moves = new HashSet<>();
 
+        ChessPiece myPiece = board.getPiece(myPosition);
+        ChessGame.TeamColor color = myPiece.getTeamColor();
+        int[][] directions = {{1, 1}, {-1, -1}, {-1, 1}, {1, -1}};
+
+        for (int[] dir : directions) {
+            int rowChange = dir[0];
+            int colChange = dir[1];
+
+            int currentRow = myPosition.getRow() + rowChange;
+            int currentCol = myPosition.getColumn() + colChange;
+
+            ChessPosition currPos = new ChessPosition(currentRow, currentCol);
+            ChessPiece pieceAtPos = board.getPiece(currPos);
+
+            if (pieceAtPos == null && isOnBoard(currPos)) {
+                moves.add(new ChessMove(myPosition, currPos, null));
+            } else {
+                if (pieceAtPos.getTeamColor() != color && isOnBoard(currPos)) {
+                    moves.add(new ChessMove(myPosition, currPos, null));
+                }
+            }
+        }
+        return moves;
+    }
 
 
         private boolean isOnBoard(ChessPosition pos) {
