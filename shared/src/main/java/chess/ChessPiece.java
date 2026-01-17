@@ -131,19 +131,17 @@ public class ChessPiece {
         int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
         for (int[] dir : directions) {
-            int rowDelta = dir[0];
-            int colDelta = dir[1];
+            int rowChange = dir[0];
+            int colChange = dir[1];
 
-            int currentRow = myPosition.getRow() + rowDelta;
-            int currentCol = myPosition.getColumn() + colDelta;
+            int currentRow = myPosition.getRow() + rowChange;
+            int currentCol = myPosition.getColumn() + colChange;
 
-            // Keep sliding until we hit the edge of the board
             while (isOnBoard(new ChessPosition(currentRow, currentCol))) {
                 ChessPosition currPos = new ChessPosition(currentRow, currentCol);
                 ChessPiece pieceAtPos = board.getPiece(currPos);
 
                 if (pieceAtPos == null) {
-                    // Square is empty, add move and continue sliding
                     moves.add(new ChessMove(myPosition, currPos, null));
                 } else {
                     if (pieceAtPos.getTeamColor() != color) {
@@ -152,14 +150,58 @@ public class ChessPiece {
                     break;
                 }
 
-                currentRow += rowDelta;
-                currentCol += colDelta;
+                currentRow += rowChange;
+                currentCol += colChange;
             }
         }
         return moves;
     }
 
-    def
+
+    public Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition myPosition) {
+        HashSet<ChessMove> moves = new HashSet<>();
+
+        ChessPiece myPiece = board.getPiece(myPosition);
+        ChessGame.TeamColor color = myPiece.getTeamColor();
+        int[][] directions = {{1, 1}, {-1, -1}, {-1, 1}, {1, -1}};
+
+        for (int[] dir : directions) {
+            int rowChange = dir[0];
+            int colChange = dir[1];
+
+            int currentRow = myPosition.getRow() + rowChange;
+            int currentCol = myPosition.getColumn() + colChange;
+
+            while (isOnBoard(new ChessPosition(currentRow, currentCol))) {
+                ChessPosition currPos = new ChessPosition(currentRow, currentCol);
+                ChessPiece pieceAtPos = board.getPiece(currPos);
+
+                if (pieceAtPos == null) {
+                    moves.add(new ChessMove(myPosition, currPos, null));
+                } else {
+                    if (pieceAtPos.getTeamColor() != color) {
+                        moves.add(new ChessMove(myPosition, currPos, null));
+                    }
+                    break;
+                }
+
+                currentRow += rowChange;
+                currentCol += colChange;
+            }
+        }
+        return moves;
+    }
+
+
+    public Collection<ChessMove> queenMoves(ChessBoard board, ChessPosition myPosition) {
+        HashSet<ChessMove> moves = new HashSet<>();
+        moves.addAll(rookMoves(board, myPosition));
+        moves.addAll(bishopMoves(board, myPosition));
+        return moves;
+    }
+
+
+
 
         private boolean isOnBoard(ChessPosition pos) {
         return pos.getRow() >= 1 && pos.getRow() <= 8 & pos.getColumn() >= 1 && pos.getColumn() <= 8;
