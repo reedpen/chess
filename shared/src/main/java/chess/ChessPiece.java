@@ -258,7 +258,7 @@ public class ChessPiece {
 
         ChessPiece myPiece = board.getPiece(myPosition);
         ChessGame.TeamColor color = myPiece.getTeamColor();
-        int[][] directions = {{1, 1}, {-1, -1}, {-1, 1}, {1, -1}};
+        int[][] directions = {{1, 0}, {-1, -0}, {0, 1}, {0, -1}};
 
         for (int[] dir : directions) {
             int rowChange = dir[0];
