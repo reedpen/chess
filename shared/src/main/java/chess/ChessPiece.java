@@ -37,28 +37,6 @@ public class ChessPiece {
         return pieceColor;
     }
 
-    @Override
-    public String toString() {
-        return "ChessPiece{" +
-                "type=" + type +
-                ", pieceColor=" + pieceColor +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ChessPiece that = (ChessPiece) o;
-        return type == that.type && pieceColor == that.pieceColor;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(type, pieceColor);
-    }
-
     /**
      * @return which type of chess piece this piece is
      */
@@ -210,6 +188,28 @@ public class ChessPiece {
             }
         }
         return moves;
+    }
+
+    @Override
+    public String toString() {
+        return "ChessPiece{" +
+                "type=" + type +
+                ", pieceColor=" + pieceColor +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessPiece that = (ChessPiece) o;
+        return type == that.type && pieceColor == that.pieceColor;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, pieceColor);
     }
 
     public Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition myPosition) {
