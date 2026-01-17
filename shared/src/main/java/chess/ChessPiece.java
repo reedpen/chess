@@ -52,27 +52,14 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        if (board.getPiece(myPosition).getPieceType() == PieceType.PAWN){
-            return pawnMoves(board, myPosition);
-        }
-        if (board.getPiece(myPosition).getPieceType() == PieceType.ROOK){
-            return rookMoves(board, myPosition);
-        }
-        if (board.getPiece(myPosition).getPieceType() == PieceType.BISHOP){
-            return bishopMoves(board, myPosition);
-        }
-        if (board.getPiece(myPosition).getPieceType() == PieceType.KNIGHT){
-            return knightMoves(board, myPosition);
-        }
-        if (board.getPiece(myPosition).getPieceType() == PieceType.QUEEN){
-            return queenMoves(board, myPosition);
-        }
-        if (board.getPiece(myPosition).getPieceType() == PieceType.KING){
-            return kingMoves(board, myPosition);
-        }
-        else{
-            return null;
-        }
+        return switch (this.type) {
+            case PAWN -> pawnMoves(board, myPosition);
+            case ROOK -> rookMoves(board, myPosition);
+            case BISHOP -> bishopMoves(board, myPosition);
+            case KNIGHT -> knightMoves(board, myPosition);
+            case QUEEN -> queenMoves(board, myPosition);
+            case KING -> kingMoves(board, myPosition);
+        };
     }
 
     public Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition) {
@@ -217,7 +204,7 @@ public class ChessPiece {
 
         ChessPiece myPiece = board.getPiece(myPosition);
         ChessGame.TeamColor color = myPiece.getTeamColor();
-        int[][] directions = {{2, 1}, {1, 2}, {-2, 1}, {-1, 2}, {-2, -1}, {-1, -2}, {-2, 1}, {-1, 2}};
+        int[][] directions = {{2, 1}, {2, -1}, {-2, 1}, {-2, -1}, {1, 2}, {1, -2}, {-1, 2}, {-1, -2}};
 
         for (int[] dir : directions) {
             int rowChange = dir[0];
@@ -226,21 +213,13 @@ public class ChessPiece {
             int currentRow = myPosition.getRow() + rowChange;
             int currentCol = myPosition.getColumn() + colChange;
 
-            while (isOnBoard(new ChessPosition(currentRow, currentCol))) {
-                ChessPosition currPos = new ChessPosition(currentRow, currentCol);
+            ChessPosition currPos = new ChessPosition(currentRow, currentCol);
+
+            if (isOnBoard(currPos)) {
                 ChessPiece pieceAtPos = board.getPiece(currPos);
-
-                if (pieceAtPos == null) {
+                if (pieceAtPos == null || pieceAtPos.getTeamColor() != color){
                     moves.add(new ChessMove(myPosition, currPos, null));
-                } else {
-                    if (pieceAtPos.getTeamColor() != color) {
-                        moves.add(new ChessMove(myPosition, currPos, null));
-                    }
-                    break;
                 }
-
-                currentRow += rowChange;
-                currentCol += colChange;
             }
         }
         return moves;
@@ -258,7 +237,7 @@ public class ChessPiece {
 
         ChessPiece myPiece = board.getPiece(myPosition);
         ChessGame.TeamColor color = myPiece.getTeamColor();
-        int[][] directions = {{1, 0}, {-1, -0}, {0, 1}, {0, -1}};
+        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
 
         for (int[] dir : directions) {
             int rowChange = dir[0];
