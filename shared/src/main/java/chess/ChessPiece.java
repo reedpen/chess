@@ -123,9 +123,45 @@ public class ChessPiece {
 
         return moves;
     }
+    public Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition myPosition) {
+        HashSet<ChessMove> moves = new HashSet<>();
 
+        ChessPiece myPiece = board.getPiece(myPosition);
+        ChessGame.TeamColor color = myPiece.getTeamColor();
+        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
-    private boolean isOnBoard(ChessPosition pos) {
+        for (int[] dir : directions) {
+            int rowDelta = dir[0];
+            int colDelta = dir[1];
+
+            int currentRow = myPosition.getRow() + rowDelta;
+            int currentCol = myPosition.getColumn() + colDelta;
+
+            // Keep sliding until we hit the edge of the board
+            while (isOnBoard(new ChessPosition(currentRow, currentCol))) {
+                ChessPosition currPos = new ChessPosition(currentRow, currentCol);
+                ChessPiece pieceAtPos = board.getPiece(currPos);
+
+                if (pieceAtPos == null) {
+                    // Square is empty, add move and continue sliding
+                    moves.add(new ChessMove(myPosition, currPos, null));
+                } else {
+                    if (pieceAtPos.getTeamColor() != color) {
+                        moves.add(new ChessMove(myPosition, currPos, null));
+                    }
+                    break;
+                }
+
+                currentRow += rowDelta;
+                currentCol += colDelta;
+            }
+        }
+        return moves;
+    }
+
+    def
+
+        private boolean isOnBoard(ChessPosition pos) {
         return pos.getRow() >= 1 && pos.getRow() <= 8 & pos.getColumn() >= 1 && pos.getColumn() <= 8;
     }
     private void addPromotionMoves(HashSet<ChessMove> moves, ChessPosition start, ChessPosition end) {
