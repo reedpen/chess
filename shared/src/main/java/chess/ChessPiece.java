@@ -74,7 +74,27 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        if (board.getPiece(myPosition).getPieceType() == PieceType.PAWN){
+            return pawnMoves(board, myPosition);
+        }
+        if (board.getPiece(myPosition).getPieceType() == PieceType.ROOK){
+            return rookMoves(board, myPosition);
+        }
+        if (board.getPiece(myPosition).getPieceType() == PieceType.BISHOP){
+            return bishopMoves(board, myPosition);
+        }
+        if (board.getPiece(myPosition).getPieceType() == PieceType.KNIGHT){
+            return knightMoves(board, myPosition);
+        }
+        if (board.getPiece(myPosition).getPieceType() == PieceType.QUEEN){
+            return queenMoves(board, myPosition);
+        }
+        if (board.getPiece(myPosition).getPieceType() == PieceType.KING){
+            return kingMoves(board, myPosition);
+        }
+        else{
+            return null;
+        }
     }
 
     public Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition) {
@@ -248,12 +268,10 @@ public class ChessPiece {
             int currentCol = myPosition.getColumn() + colChange;
 
             ChessPosition currPos = new ChessPosition(currentRow, currentCol);
-            ChessPiece pieceAtPos = board.getPiece(currPos);
 
-            if (pieceAtPos == null && isOnBoard(currPos)) {
-                moves.add(new ChessMove(myPosition, currPos, null));
-            } else {
-                if (pieceAtPos.getTeamColor() != color && isOnBoard(currPos)) {
+            if (isOnBoard(currPos)) {
+                ChessPiece pieceAtPos = board.getPiece(currPos);
+                if (pieceAtPos == null || pieceAtPos.getTeamColor() != color){
                     moves.add(new ChessMove(myPosition, currPos, null));
                 }
             }
