@@ -93,7 +93,7 @@ public class ChessBoard {
      * Sets the back row of pieces to their default starting position.
      */
     public void setBackRows() {
-        ChessPiece.PieceType[] PieceRowOrder = {
+        ChessPiece.PieceType[] pieceRowOrder = {
                 ChessPiece.PieceType.ROOK,
                 ChessPiece.PieceType.KNIGHT,
                 ChessPiece.PieceType.BISHOP,
@@ -105,12 +105,12 @@ public class ChessBoard {
         };
         // add back row of white pieces
         for (int i = 0; i<8; i++){
-            ChessPiece whitePiece = new ChessPiece(ChessGame.TeamColor.WHITE, PieceRowOrder[i]);
+            ChessPiece whitePiece = new ChessPiece(ChessGame.TeamColor.WHITE, pieceRowOrder[i]);
             ChessPosition pos = new ChessPosition(1, i+1);
             addPiece(pos, whitePiece);
         }
         for (int i = 0; i<8; i++){
-            ChessPiece blackPiece = new ChessPiece(ChessGame.TeamColor.BLACK, PieceRowOrder[i]);
+            ChessPiece blackPiece = new ChessPiece(ChessGame.TeamColor.BLACK, pieceRowOrder[i]);
             ChessPosition pos = new ChessPosition(8, i+1);
             addPiece(pos, blackPiece);
         }
