@@ -29,6 +29,27 @@ public class ChessPiece {
         ROOK,
         PAWN
     }
+    @Override
+    public String toString() {
+        return "ChessPiece{" +
+                "type=" + type +
+                ", pieceColor=" + pieceColor +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessPiece that = (ChessPiece) o;
+        return type == that.type && pieceColor == that.pieceColor;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, pieceColor);
+    }
 
     /**
      * @return Which team this chess piece belongs to
@@ -177,27 +198,6 @@ public class ChessPiece {
         return moves;
     }
 
-    @Override
-    public String toString() {
-        return "ChessPiece{" +
-                "type=" + type +
-                ", pieceColor=" + pieceColor +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ChessPiece that = (ChessPiece) o;
-        return type == that.type && pieceColor == that.pieceColor;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(type, pieceColor);
-    }
 
     public Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition myPosition) {
         HashSet<ChessMove> moves = new HashSet<>();
@@ -259,7 +259,7 @@ public class ChessPiece {
     }
 
 
-        private boolean isOnBoard(ChessPosition pos) {
+    private boolean isOnBoard(ChessPosition pos) {
         return pos.getRow() >= 1 && pos.getRow() <= 8 & pos.getColumn() >= 1 && pos.getColumn() <= 8;
     }
     private void addPromotionMoves(HashSet<ChessMove> moves, ChessPosition start, ChessPosition end) {
