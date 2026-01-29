@@ -62,7 +62,12 @@ public class ChessGame {
         throw new RuntimeException("Not implemented");
     }
 
-
+    /**
+     * Returns a collection of moves a certain color's opposing team
+     *
+     * @param teamColor the team color whose enemy you want to see the moves of.
+     * @return a set of all the enemy's possible ChessMoves
+     */
 
     public Collection<ChessMove> getEnemyMoves(TeamColor teamColor) {
         Collection<ChessMove> enemyMoves = new HashSet<>();
@@ -78,6 +83,12 @@ public class ChessGame {
         return enemyMoves;
     }
 
+    /**
+     * Returns a set of end positions from a given set of moves.
+     *
+     * @param moves the set of ChessMove objects to get the positions from
+     * @return a set of ChessMove objects
+     */
     public Collection<ChessPosition> getEndPositions(Collection<ChessMove> moves) {
         Collection<ChessPosition> positions = new HashSet<>();
         for (ChessMove move : moves){
