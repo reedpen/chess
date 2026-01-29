@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -61,6 +62,29 @@ public class ChessGame {
         throw new RuntimeException("Not implemented");
     }
 
+
+
+    public Collection<ChessMove> getEnemyMoves(TeamColor teamColor) {
+        Collection<ChessMove> enemyMoves = new HashSet<>();
+        for (int row = 1; row < 9; row++) {
+            for (int col = 1; col < 9; col++){
+                ChessPosition currPos = new ChessPosition(row, col);
+                ChessPiece currPiece = board.getPiece(currPos);
+                if (currPiece.getTeamColor() != teamColor) {
+                    enemyMoves.addAll(currPiece.pieceMoves(board, currPos));
+                }
+            }
+        }
+        return enemyMoves;
+    }
+
+    public Collection<ChessPosition> getEndPositions(Collection<ChessMove> moves) {
+        Collection<ChessPosition> positions = new HashSet<>();
+        for (ChessMove move : moves){
+            positions.add(move.getEndPosition());
+        }
+        return positions;
+    }
     /**
      * Determines if the given team is in check
      *
@@ -68,7 +92,7 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        return getEndPositions(getEnemyMoves(teamColor)).contains(board.getKingPos(teamColor));
     }
 
     /**

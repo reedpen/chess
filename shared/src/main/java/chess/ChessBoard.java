@@ -1,7 +1,6 @@
 package chess;
 
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -11,6 +10,7 @@ import java.util.Objects;
  */
 public class ChessBoard {
     private ChessPiece[][] Board;
+    public HashMap<String, Object[]> kingMap;
 
     public ChessBoard() {
         // Create 8*8 empty board to populate with pieces
@@ -108,11 +108,23 @@ public class ChessBoard {
             ChessPiece whitePiece = new ChessPiece(ChessGame.TeamColor.WHITE, pieceRowOrder[i]);
             ChessPosition pos = new ChessPosition(1, i+1);
             addPiece(pos, whitePiece);
+            if (i == 4){
+                Object[] posAndPiece = {pos, whitePiece};
+                kingMap.put("whiteKing", posAndPiece);
+            }
         }
         for (int i = 0; i<8; i++){
             ChessPiece blackPiece = new ChessPiece(ChessGame.TeamColor.BLACK, pieceRowOrder[i]);
             ChessPosition pos = new ChessPosition(8, i+1);
             addPiece(pos, blackPiece);
+            if (i == 4){
+                Object[] posAndPiece = {pos, blackPiece};
+                kingMap.put("blackKing", posAndPiece);
+            }
         }
+    }
+    public ChessPosition getKingPos(ChessGame.TeamColor teamColor) {
+        Object objPos = (teamColor== ChessGame.TeamColor.WHITE) ? kingMap.get("whiteKing")[0] : kingMap.get("blackKing")[0];
+        return (ChessPosition) objPos;
     }
 }

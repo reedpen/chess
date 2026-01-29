@@ -1,10 +1,8 @@
 package chess;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
 public class MoveCalculator {
-    private ChessBoard board;
 
 
     /**
