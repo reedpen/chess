@@ -57,18 +57,19 @@ public class ChessGame {
             ChessPiece piece = board.getPiece(startPosition);
             TeamColor color = piece.getTeamColor();
             Collection<ChessMove> moves = piece.pieceMoves(board, startPosition);
-
+            ChessBoard ogBoard = board.deepCopy();
             // check if move leaves king in check
             for(ChessMove move : moves) {
                 ChessPosition pos = move.endPos;
-                ChessBoard copyBoard = board.deepCopy();
-                setBoard(copyBoard);
+                ChessBoard copyBoard = ogBoard.deepCopy();
+                copyBoard.addPiece(pos, null);
                 copyBoard.addPiece(pos, piece);
                 copyBoard.addPiece(startPosition, null);
+                setBoard(copyBoard);
                 if (!isInCheck(color)){
                     validMoves.add(move);
                 }
-                setBoard(board);
+                setBoard(ogBoard);
             }
             return validMoves;
         } else {
@@ -129,7 +130,8 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        return getEndPositions(getEnemyMoves(teamColor)).contains(board.getKingPos(teamColor));
+        Collection<ChessPosition> enemyEndPositions = getEndPositions(getEnemyMoves(teamColor));
+        return enemyEndPositions.contains(getKingPos(teamColor));
     }
 
     /**
@@ -169,5 +171,22 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    public ChessPosition getKingPos(TeamColor teamColor){
+        for (int row = 1; row<9; row++) {
+            for (int col = 1; col<9; col++){
+                ChessPosition pos = new ChessPosition(row, col);
+                if (board.getPiece(pos) == null) {
+                    continue;
+                }
+                ChessPiece piece = board.getPiece(pos);
+                TeamColor color = piece.getTeamColor();
+                if (color == teamColor && piece.getPieceType() == ChessPiece.PieceType.KING){
+                    return pos;
+                }
+            }
+        }
+        return null;
     }
 }
