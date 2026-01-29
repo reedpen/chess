@@ -48,8 +48,32 @@ public class ChessGame {
      * @return Set of valid moves for requested piece, or null if no piece at
      * startPosition
      */
+
+
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        // is there a piece at startPos?
+        if (board.getPiece(startPosition) != null){
+            Collection<ChessMove> validMoves = new HashSet<>();
+            ChessPiece piece = board.getPiece(startPosition);
+            TeamColor color = piece.getTeamColor();
+            Collection<ChessMove> moves = piece.pieceMoves(board, startPosition);
+
+            // check if move leaves king in check
+            for(ChessMove move : moves) {
+                ChessPosition pos = move.endPos;
+                ChessBoard copyBoard = board.deepCopy();
+                setBoard(copyBoard);
+                copyBoard.addPiece(pos, piece);
+                copyBoard.addPiece(startPosition, null);
+                if (!isInCheck(color)){
+                    validMoves.add(move);
+                }
+                setBoard(board);
+            }
+            return validMoves;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -74,9 +98,11 @@ public class ChessGame {
         for (int row = 1; row < 9; row++) {
             for (int col = 1; col < 9; col++){
                 ChessPosition currPos = new ChessPosition(row, col);
-                ChessPiece currPiece = board.getPiece(currPos);
-                if (currPiece.getTeamColor() != teamColor) {
-                    enemyMoves.addAll(currPiece.pieceMoves(board, currPos));
+                if (board.getPiece(currPos) != null) {
+                    ChessPiece currPiece = board.getPiece(currPos);
+                    if (currPiece.getTeamColor() != teamColor) {
+                        enemyMoves.addAll(currPiece.pieceMoves(board, currPos));
+                    }
                 }
             }
         }

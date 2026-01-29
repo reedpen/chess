@@ -16,6 +16,31 @@ public class ChessBoard {
         // Create 8*8 empty board to populate with pieces
         this.Board = new ChessPiece[8][8];
     }
+    public ChessBoard deepCopy() {
+        ChessBoard cloneBoard = new ChessBoard();
+        for(int row = 0; row <8; row++){
+            for(int col = 0; col<8; col++){
+                ChessPiece ogPiece = this.Board[row][col];
+                if (ogPiece != null){
+                    ChessPiece newPiece = new ChessPiece(ogPiece.getTeamColor(), ogPiece.getPieceType());
+                    ChessPosition currPos = new ChessPosition(row+1, col+1);
+                    cloneBoard.addPiece(currPos, newPiece);
+                    if (ogPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                        String key = (ogPiece.getTeamColor() == ChessGame.TeamColor.WHITE) ? "whiteKing" : "blackKing";
+                        Object[] posAndPiece = {currPos, newPiece};
+                        if (cloneBoard.kingMap == null){
+                            cloneBoard.kingMap = new HashMap<>();
+                        }
+                        cloneBoard.kingMap.put(key, posAndPiece);
+                    }
+                }
+            }
+        }
+
+        return cloneBoard;
+
+    }
+
     @Override
     public String toString() {
         return "ChessBoard{" +
