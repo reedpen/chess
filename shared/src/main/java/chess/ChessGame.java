@@ -62,7 +62,6 @@ public class ChessGame {
             for(ChessMove move : moves) {
                 ChessPosition pos = move.endPos;
                 ChessBoard copyBoard = ogBoard.deepCopy();
-                copyBoard.addPiece(pos, null);
                 copyBoard.addPiece(pos, piece);
                 copyBoard.addPiece(startPosition, null);
                 setBoard(copyBoard);
@@ -84,7 +83,33 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        if (board.getPiece(move.startPos) == null) {
+            throw new InvalidMoveException("Invalid Move");
+        }
+        if (currentTeam != board.getPiece(move.startPos).getTeamColor()) {
+            throw new InvalidMoveException("Invalid Move");
+        }
+        Collection<ChessMove> validMoves = validMoves(move.startPos);
+
+        if (validMoves.contains(move)){
+            if (move.promotionPiece != null) {
+                ChessPiece promoPiece = new ChessPiece(board.getPiece(move.startPos).getTeamColor(), move.promotionPiece);
+                board.addPiece(move.endPos, promoPiece);
+                board.addPiece(move.startPos, null);
+                changeTeam();
+            } else{
+                ChessPiece piece = board.getPiece(move.startPos);
+                board.addPiece(move.endPos, piece);
+                board.addPiece(move.startPos, null);
+                changeTeam();
+            }
+
+
+        } else {
+            throw new InvalidMoveException("Invalid Move");
+
+        }
+
     }
 
     /**
@@ -141,7 +166,18 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+//        for (int row = 1; row < 9; row++) {
+//            for (int col = 1; col < 9; col++){
+//                ChessPosition currPos = new ChessPosition(row, col);
+//                if (board.getPiece(currPos) != null) {
+//                    ChessPiece currPiece = board.getPiece(currPos);
+//                    if (currPiece.getTeamColor() != teamColor) {
+//                        enemyMoves.addAll(currPiece.pieceMoves(board, currPos));
+//                    }
+//                }
+//            }
+//        }
+        return true;
     }
 
     /**
@@ -164,6 +200,13 @@ public class ChessGame {
         this.board = board;
     }
 
+    public void changeTeam(){
+        if (this.currentTeam == TeamColor.WHITE) {
+            this.currentTeam = TeamColor.BLACK;
+        } else {
+            this.currentTeam = TeamColor.WHITE;
+        }
+    }
     /**
      * Gets the current chessboard
      *
