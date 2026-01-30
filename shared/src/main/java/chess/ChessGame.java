@@ -22,6 +22,7 @@ public class ChessGame {
         currentTeam = TeamColor.WHITE;
     }
 
+
     /**
      * @return Which team's turn it is
      */
@@ -140,9 +141,15 @@ public class ChessGame {
         for (int row = 1; row < 9; row++) {
             for (int col = 1; col < 9; col++){
                 ChessPosition pos = new ChessPosition(row, col);
-                validMoves.addAll(validMoves(pos));
+                if (board.getPiece(pos) == null) {
+                    continue;
+                }
+                ChessPiece piece = board.getPiece(pos);
+                if (piece.getTeamColor() == teamColor){
+                    validMoves.addAll(validMoves(pos));
                 }
             }
+        }
 
         return validMoves;
     }
@@ -181,19 +188,6 @@ public class ChessGame {
         return (isInCheck(teamColor) && getValidMoves(teamColor).isEmpty());
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ChessGame chessGame = (ChessGame) o;
-        return currentTeam == chessGame.currentTeam && Objects.equals(board, chessGame.board);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(currentTeam, board);
-    }
 
     /**
      * Determines if the given team is in stalemate, which here is defined as having
@@ -217,9 +211,9 @@ public class ChessGame {
 
     public void changeTeam(){
         if (this.currentTeam == TeamColor.WHITE) {
-            this.currentTeam = TeamColor.BLACK;
+            setTeamTurn(TeamColor.BLACK);
         } else {
-            this.currentTeam = TeamColor.WHITE;
+            setTeamTurn(TeamColor.WHITE);
         }
     }
     /**
@@ -247,4 +241,27 @@ public class ChessGame {
         }
         return null;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return currentTeam == chessGame.currentTeam && Objects.equals(board, chessGame.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(currentTeam, board);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessGame{" +
+                "currentTeam=" + currentTeam +
+                ", board=" + board +
+                '}';
+    }
+
 }
