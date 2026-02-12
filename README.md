@@ -6,7 +6,7 @@ This project demonstrates mastery of proper software design, client/server archi
 
 The application implements a multiplayer chess server and a command line chess client.
 
-[![Sequence Diagram](sequence.png)
+![Sequence Diagram](sequence.png)
 ## Modules
 
 The application has three modules.
