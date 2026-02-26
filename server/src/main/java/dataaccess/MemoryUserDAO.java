@@ -12,7 +12,7 @@ public class MemoryUserDAO implements UserDAO{
     final Map<String, UserData> users = new HashMap<>();
     @Override
     public UserData getUserData(String username) throws DataAccessException {
-        if (!users.containsKey(username)) {
+        if (users.containsKey(username)) {
             return users.get(username);
         } else {
             throw new DataAccessException("Username not in database");
@@ -31,7 +31,7 @@ public class MemoryUserDAO implements UserDAO{
 
     @Override
     public void deleteUser(String username) throws DataAccessException{
-        if (!users.containsKey(username)) {
+        if (users.containsKey(username)) {
             users.remove(username);
         } else {
             throw new DataAccessException("Username not in database");
