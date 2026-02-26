@@ -16,11 +16,13 @@ public class UserService {
         this.userDAO = userDAO;
     }
 
-    public static RegisterResult register(RegisterRequest request) throws ResponseException{
+    public RegisterResult register(RegisterRequest request) throws ResponseException{
 
 
-        if (request.username() == null || request.email() == null || request.password() == null) {
-            throw new ResponseException(400, "Bad Request");
+        if (request.username() == null || request.username().isEmpty() ||
+                request.email() == null || request.email().isEmpty() ||
+                request.password() == null || request.password().isEmpty()) {
+            throw new ResponseException(400, "Error: bad request");
         }
 
         try {
@@ -30,7 +32,7 @@ public class UserService {
             UserData userData = new UserData(request.username(), request.password(), request.email());
             userDAO.createUser(userData);
             String token = createAuthToken();
-            authDAO.createAuth(token, request.username());
+            authDAO.createAuth(new AuthData(token, request.username()));
             return new RegisterResult(request.username(), token);
         }
         catch (DataAccessException  e) {
