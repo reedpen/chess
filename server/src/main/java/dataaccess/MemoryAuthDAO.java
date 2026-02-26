@@ -2,19 +2,24 @@ package dataaccess;
 
 import model.AuthData;
 
+import javax.xml.crypto.Data;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import service.AuthService;
 
 public class MemoryAuthDAO implements AuthDAO{
 
     final Map<String, AuthData> auths = new HashMap<>();
 
     @Override
-    public void createAuth(String username) {
-        auths.put(username, new AuthData(AuthService.createAuthToken(), username));
+    public void createAuth(String username)  {
+        if (!auths.containsKey(username)){
+            auths.put(username, new AuthData(createAuthToken(), username));
+        } else {
+            throw new DataAccessException("Username already taken");
+        }
+
     }
 
     @Override
