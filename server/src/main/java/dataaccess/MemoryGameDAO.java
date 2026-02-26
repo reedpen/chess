@@ -2,13 +2,18 @@ package dataaccess;
 
 import chess.ChessGame;
 import model.GameData;
+import service.GameService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MemoryGameDAO implements GameDAO{
+    final Map<String, Integer> games = new HashMap<>();
+
     @Override
     public void clear() {
-
+        games.clear();
     }
 
     @Override
