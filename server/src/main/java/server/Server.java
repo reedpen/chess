@@ -1,5 +1,6 @@
 package server;
 
+import dataaccess.*;
 import io.javalin.*;
 
 public class Server {
@@ -15,7 +16,13 @@ public class Server {
 
     public int run(int desiredPort) {
         javalin.start(desiredPort);
+        UserDAO userDAO = new MemoryUserDAO();
+        GameDAO gameDAO = new MemoryGameDAO();
+        AuthDAO authDAO = new MemoryAuthDAO();
+
+
         return javalin.port();
+
     }
 
     public void stop() {

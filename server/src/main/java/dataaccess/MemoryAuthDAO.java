@@ -13,9 +13,9 @@ public class MemoryAuthDAO implements AuthDAO{
     final Map<String, AuthData> auths = new HashMap<>();
 
     @Override
-    public void createAuth(String username) throws DataAccessException {
+    public void createAuth(String authToken, String username) throws DataAccessException {
         if (!auths.containsKey(username)){
-            auths.put(username, new AuthData(createAuthToken(), username));
+            auths.put(username, new AuthData(authToken, username));
         } else {
             throw new DataAccessException("Username already has associated auth token");
         }
@@ -41,9 +41,7 @@ public class MemoryAuthDAO implements AuthDAO{
         }
 
     }
-    public static String createAuthToken(){
-        return UUID.randomUUID().toString();
-    }
+
     @Override
     public void deleteAllAuth() {
         auths.clear();
