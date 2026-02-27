@@ -68,7 +68,7 @@ public class ServiceTests {
         ResponseException e = assertThrows(ResponseException.class, () -> service.login(lReq));
     }
     @Test
-    void loginWrongUser() throws DataAccessException, ResponseException {
+    void loginWrongUser() throws ResponseException {
         UserService service = new UserService(authDAO, userDAO);
         RegisterRequest req = new RegisterRequest("reed", "123", "reed@gmail.com");
         UserResult res = service.register(req);
@@ -76,4 +76,30 @@ public class ServiceTests {
 
         ResponseException e = assertThrows(ResponseException.class, () -> service.login(lReq));
     }
+    @Test
+    void loginEmpty() throws ResponseException {
+        UserService service = new UserService(authDAO, userDAO);
+        RegisterRequest req = new RegisterRequest("reed", "123", "reed@gmail.com");
+        UserResult res = service.register(req);
+        LoginRequest lReq = new LoginRequest("", "");
+
+        ResponseException e = assertThrows(ResponseException.class, () -> service.login(lReq));
+    }
+
+    @Test
+    void logoutPositive() throws ResponseException {
+        UserService service = new UserService(authDAO, userDAO);
+        RegisterRequest req = new RegisterRequest("reed", "123", "reed@gmail.com");
+        UserResult res = service.register(req);
+        assertTrue(service.logout(res.authToken()));
+    }
+    @Test
+    void logoutNegative() throws DataAccessException, ResponseException {
+        UserService service = new UserService(authDAO, userDAO);
+        RegisterRequest req = new RegisterRequest("reed", "123", "reed@gmail.com");
+        UserResult res = service.register(req);
+        authDAO.deleteAllAuth();
+        ResponseException e = assertThrows(ResponseException.class, () -> service.logout(res.authToken()));
+    }
+
 }
