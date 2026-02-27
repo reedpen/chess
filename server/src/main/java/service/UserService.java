@@ -6,8 +6,9 @@ import org.eclipse.jetty.server.Authentication;
 import requestsandresults.*;
 
 import java.util.Objects;
+import java.util.UUID;
 
-import static service.AuthService.createAuthToken;
+
 
 public class UserService {
 
@@ -17,7 +18,9 @@ public class UserService {
         this.authDAO = authDAO;
         this.userDAO = userDAO;
     }
-
+    public static String createAuthToken(){
+        return UUID.randomUUID().toString();
+    }
     public UserResult register(RegisterRequest request) throws ResponseException{
 
         if (request.username() == null || request.username().isEmpty() ||
@@ -62,10 +65,9 @@ public class UserService {
 
     }
 
-    public boolean logout(String authToken) throws ResponseException {
+    public void logout(String authToken) throws ResponseException {
         try {
             authDAO.deleteAuth(authToken);
-            return true;
         }
         catch(DataAccessException e) {
             throw new ResponseException(401, "Error: unauthorized");

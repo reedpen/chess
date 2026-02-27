@@ -95,7 +95,7 @@ public class ServiceTests {
         UserService service = new UserService(authDAO, userDAO);
         RegisterRequest req = new RegisterRequest("reed", "123", "reed@gmail.com");
         UserResult res = service.register(req);
-        assertTrue(service.logout(res.authToken()));
+        assertDoesNotThrow(() -> service.logout(res.authToken()));
     }
     @Test
     void logoutNegative() throws DataAccessException, ResponseException {
@@ -156,7 +156,7 @@ public class ServiceTests {
         CreateGameRequest greq = new CreateGameRequest("reed game");
         CreateGameResult gres = service.createGame("1", greq);
         JoinGameRequest req = new JoinGameRequest("WHITE", gres.gameID());
-        assertDoesNotThrow(() -> {service.joinGame(req ,"1");});
+        assertDoesNotThrow(() -> {service.joinGame("1", req);});
         assertEquals("r", gameDAO.getGame(req.gameID()).whiteUsername());
         assertNull(gameDAO.getGame(req.gameID()).blackUsername());
     }
@@ -168,9 +168,9 @@ public class ServiceTests {
         CreateGameRequest greq = new CreateGameRequest("reed game");
         CreateGameResult gres = service.createGame("1", greq);
         JoinGameRequest req = new JoinGameRequest("WHITE", gres.gameID());
-        service.joinGame(req ,"1");
+        service.joinGame("1", req);
         JoinGameRequest req2 = new JoinGameRequest("WHITE", gres.gameID());
-        ResponseException e = assertThrows(ResponseException.class, () -> service.joinGame(req ,"1"));
+        ResponseException e = assertThrows(ResponseException.class, () -> service.joinGame("1", req));
     }
 
     @Test

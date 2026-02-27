@@ -51,7 +51,7 @@ public class GameService {
 
     }
 
-    public void joinGame(JoinGameRequest request, String authToken) throws ResponseException {
+    public void joinGame(String authToken, JoinGameRequest request) throws ResponseException {
         if (request == null || authToken == null  || request.playerColor() == null|| request.playerColor().isEmpty()) {
             throw new ResponseException(400, "Error: bad request");
         }
