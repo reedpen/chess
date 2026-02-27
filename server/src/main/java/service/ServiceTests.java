@@ -115,7 +115,7 @@ public class ServiceTests {
         gameDAO.createGame(data);
         gameDAO.createGame(data2);
         Collection<GameData> list = new ArrayList<>();
-        Collection<GameData> actual = service.listGames(new ListGamesRequest("1")).games();
+        Collection<GameData> actual = service.listGames("1").games();
         list.add(data);
         list.add(data2);
         assertEquals(list.size(), actual.size());
@@ -129,7 +129,7 @@ public class ServiceTests {
         GameData data2 = new GameData(2, "josh", "kaleb", "the game but 2", new ChessGame());
         gameDAO.createGame(data);
         gameDAO.createGame(data2);
-        ResponseException e = assertThrows(ResponseException.class, () -> service.listGames(new ListGamesRequest("2")));
+        ResponseException e = assertThrows(ResponseException.class, () -> service.listGames("2"));
     }
     @Test
     void createGamePositive() throws ResponseException, DataAccessException {
@@ -149,4 +149,27 @@ public class ServiceTests {
         ResponseException e = assertThrows(ResponseException.class, () -> service.createGame("2", new CreateGameRequest("2")));
     }
 
+    @Test
+    void joinGamePositive() throws ResponseException, DataAccessException {
+        GameService service = new GameService(authDAO, userDAO, gameDAO);
+        authDAO.createAuth(new AuthData("1", "r"));
+        CreateGameRequest greq = new CreateGameRequest("reed game");
+        CreateGameResult gres = service.createGame("1", greq);
+        JoinGameRequest req = new JoinGameRequest("WHITE", gres.gameID());
+        assertDoesNotThrow(() -> {service.joinGame(req ,"1");});
+        assertEquals("r", gameDAO.getGame(req.gameID()).whiteUsername());
+        assertNull(gameDAO.getGame(req.gameID()).blackUsername());
+    }
+    @Test
+    void joinGameTaken() throws ResponseException, DataAccessException {
+        GameService service = new GameService(authDAO, userDAO, gameDAO);
+        authDAO.createAuth(new AuthData("1", "r"));
+        authDAO.createAuth(new AuthData("2", "j"));
+        CreateGameRequest greq = new CreateGameRequest("reed game");
+        CreateGameResult gres = service.createGame("1", greq);
+        JoinGameRequest req = new JoinGameRequest("WHITE", gres.gameID());
+        service.joinGame(req ,"1");
+        JoinGameRequest req2 = new JoinGameRequest("WHITE", gres.gameID());
+        ResponseException e = assertThrows(ResponseException.class, () -> service.joinGame(req ,"1"));
+    }
 }

@@ -7,10 +7,7 @@ import dataaccess.GameDAO;
 import dataaccess.UserDAO;
 import model.AuthData;
 import model.GameData;
-import requestsandresults.CreateGameRequest;
-import requestsandresults.CreateGameResult;
-import requestsandresults.ListGamesRequest;
-import requestsandresults.ListGamesResult;
+import requestsandresults.*;
 
 
 public class GameService {
@@ -24,9 +21,9 @@ public class GameService {
         this.gameDAO = gameDAO;
     }
 
-    public ListGamesResult listGames(ListGamesRequest request) throws ResponseException {
+    public ListGamesResult listGames(String authToken) throws ResponseException {
         try {
-            AuthData authData = authDAO.getAuth(request.authToken());
+            AuthData authData = authDAO.getAuth(authToken);
             if (authData == null) {
                 throw new ResponseException(401, "Error: unauthorized");
             }
@@ -37,11 +34,10 @@ public class GameService {
     }
 
 
-    public boolean clear() {
+    public void clear() {
         gameDAO.clear();
         authDAO.clear();
         userDAO.clear();
-        return true;
     }
 
     public CreateGameResult createGame(String authToken, CreateGameRequest request) throws ResponseException {
@@ -59,6 +55,43 @@ public class GameService {
         } catch (DataAccessException e) {
             throw new ResponseException(500, "Error: " + e.getMessage());
         }
+
+    }
+
+    public void joinGame(JoinGameRequest request, String authToken) throws ResponseException {
+        if (request == null || authToken == null  || request.playerColor() == null|| request.playerColor().isEmpty()) {
+            throw new ResponseException(400, "Error: bad request");
+        }
+        try {
+            AuthData authData = authDAO.getAuth(authToken);
+            if (authData == null) {
+                throw new ResponseException(401, "Error: unauthorized");
+            }
+
+            GameData oldData = gameDAO.getGame(request.gameID());
+            if (oldData == null) {
+                throw new ResponseException(400, "Error: bad request");
+            }
+            GameData newData;
+            String username = authData.username();
+            if ("WHITE".equals(request.playerColor())) {
+                if (oldData.whiteUsername() != null) {
+                    throw new ResponseException(403, "Error: already taken");
+                }
+                newData = new GameData(oldData.gameID(), username, oldData.blackUsername(), oldData.gameName(), oldData.game());
+            } else if ("BLACK".equals(request.playerColor())) {
+                if (oldData.blackUsername() != null) {
+                    throw new ResponseException(403, "Error: already taken");
+                }
+                newData = new GameData(oldData.gameID(), oldData.whiteUsername(), username, oldData.gameName(), oldData.game());
+            } else {
+                throw new ResponseException(400, "Error: bad request");
+            }
+            gameDAO.updateGame(newData);
+        } catch (DataAccessException e) {
+            throw new ResponseException(500, "Error: " + e.getMessage());
+        }
+
 
     }
 }
