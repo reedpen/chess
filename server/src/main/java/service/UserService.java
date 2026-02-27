@@ -2,7 +2,6 @@ package service;
 import dataaccess.*;
 import model.AuthData;
 import model.UserData;
-import org.eclipse.jetty.server.Authentication;
 import requestsandresults.*;
 
 import java.util.Objects;
@@ -11,26 +10,28 @@ import static service.AuthService.createAuthToken;
 
 public class UserService {
 
-    static AuthDAO authDAO;
-    static UserDAO userDAO;
+    private final AuthDAO authDAO;
+    private final UserDAO userDAO;
     public UserService(AuthDAO authDAO, UserDAO userDAO){
         this.authDAO = authDAO;
         this.userDAO = userDAO;
     }
 
 
-    private boolean isRequestBad(UserRequest request) {
+    private boolean isRegRequestBad(RegisterRequest request) {
         return request.username() == null || request.username().isEmpty() ||
                 request.email() == null || request.email().isEmpty() ||
                 request.password() == null || request.password().isEmpty();
     }
+    private boolean isLoginRequestBad(LoginRequest request) {
+        return request.username() == null || request.username().isEmpty() ||
+                request.password() == null || request.password().isEmpty();
+    }
 
-    private boolean isGoodPassword()
-
-    public UserResult register(UserRequest request) throws ResponseException{
+    public UserResult register(RegisterRequest request) throws ResponseException{
 
 
-        if (isRequestBad(request)) {
+        if (isRegRequestBad(request)) {
             throw new ResponseException(400, "Error: bad request");
         }
 
@@ -49,28 +50,26 @@ public class UserService {
         }
     }
 
-    public UserResult login(UserRequest request) throws ResponseException{
-        if (isRequestBad(request)) {
+    public UserResult login(LoginRequest request) throws ResponseException{
+        if (isLoginRequestBad(request)) {
             throw new ResponseException(400, "Error: bad request");
         }
 
         try {
-            userDAO.getUserData(request.username());
-            if (Objects.equals(request.password(), userDAO.getUserData(request.username()).password())){
-                UserData data = userDAO.getUserData(request.username());
-                String token = createAuthToken();
-                authDAO.createAuth(new AuthData(token, data.username()));
-                return new UserResult(request.username(), token);
-            } else {
-                throw new ResponseException(401, "Error: bad username or password");
+            UserData data = userDAO.getUserData(request.username());
+            if (data == null || !Objects.equals(request.password(), data.password())){
+                throw new ResponseException(401, "Error: unauthorized");
             }
-
+            String token = createAuthToken();
+            authDAO.createAuth(new AuthData(token, data.username()));
+            return new UserResult(request.username(), token);
         }
         catch(DataAccessException e) {
-            throw new ResponseException(401, "Error: bad username or password");
+            throw new ResponseException(500, "Error: " + e.getMessage());
         }
 
     }
+
 
 
 }
