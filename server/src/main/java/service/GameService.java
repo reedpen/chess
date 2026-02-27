@@ -27,6 +27,9 @@ public class GameService {
     public ListGamesResult listGames(ListGamesRequest request) throws ResponseException {
         try {
             AuthData authData = authDAO.getAuth(request.authToken());
+            if (authData == null) {
+                throw new ResponseException(401, "Error: unauthorized");
+            }
         } catch (DataAccessException e) {
             throw new ResponseException(401, "Error: unauthorized");
         }

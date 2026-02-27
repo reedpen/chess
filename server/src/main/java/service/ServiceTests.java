@@ -123,7 +123,16 @@ public class ServiceTests {
         list.add(data2);
         assertEquals(list.size(), actual.size());
         assertTrue(actual.containsAll(list));
-        System.out.println(list);
+    }
+    @Test
+    void listGamesNegative() throws ResponseException, DataAccessException {
+        GameService service = new GameService(authDAO, userDAO, gameDAO);
+        authDAO.createAuth(new AuthData("1", "r"));
+        GameData data = new GameData(1, "jason", "reed", "the game", new ChessGame());
+        GameData data2 = new GameData(2, "josh", "kaleb", "the game but 2", new ChessGame());
+        gameDAO.createGame(data);
+        gameDAO.createGame(data2);
+        ResponseException e = assertThrows(ResponseException.class, () -> service.listGames(new ListGamesRequest("2")));
     }
 
 }
