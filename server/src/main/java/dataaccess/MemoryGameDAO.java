@@ -8,6 +8,7 @@ import java.util.*;
 
 public class MemoryGameDAO implements GameDAO{
     final Map<Integer, GameData> games = new HashMap<>();
+    private int nextID = 1;
 
     @Override
     public void clear() {
@@ -15,12 +16,12 @@ public class MemoryGameDAO implements GameDAO{
     }
 
     @Override
-    public void createGame(GameData gameData) throws DataAccessException {
-        if (games.get(gameData.gameID()) == null){
-            games.put(gameData.gameID(), gameData);
-        } else {
-            throw new DataAccessException("Game with this ID already exists");
-        }
+    public int createGame(GameData gameData){
+        int currentID = nextID++;
+        GameData newGame = new GameData(currentID, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), gameData.game());
+        games.put(currentID, newGame);
+        return currentID;
+
 
     }
 

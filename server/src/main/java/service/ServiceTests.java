@@ -5,10 +5,7 @@ import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import org.junit.jupiter.api.Test;
-import requestsandresults.ListGamesRequest;
-import requestsandresults.LoginRequest;
-import requestsandresults.RegisterRequest;
-import requestsandresults.UserResult;
+import requestsandresults.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -133,6 +130,23 @@ public class ServiceTests {
         gameDAO.createGame(data);
         gameDAO.createGame(data2);
         ResponseException e = assertThrows(ResponseException.class, () -> service.listGames(new ListGamesRequest("2")));
+    }
+    @Test
+    void createGamePositive() throws ResponseException, DataAccessException {
+        GameService service = new GameService(authDAO, userDAO, gameDAO);
+        authDAO.createAuth(new AuthData("1", "r"));
+        CreateGameRequest req = new CreateGameRequest("reed game");
+        CreateGameResult res = service.createGame("1", req);
+        assertEquals(gameDAO.getGame(res.gameID()).gameName(), req.gameName());
+        assertNotNull(gameDAO.getGame(res.gameID()));
+    }
+    @Test
+    void createGameNegative() throws ResponseException, DataAccessException {
+        GameService service = new GameService(authDAO, userDAO, gameDAO);
+        authDAO.createAuth(new AuthData("1", "r"));
+        CreateGameRequest req = new CreateGameRequest("reed game");
+        CreateGameResult res = service.createGame("1", req);
+        ResponseException e = assertThrows(ResponseException.class, () -> service.createGame("2", new CreateGameRequest("2")));
     }
 
 }
