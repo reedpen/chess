@@ -31,7 +31,7 @@ public class UserService {
 
         try {
             if (userDAO.getUserData(request.username()) != null) {
-                throw new ResponseException(403, "Already Taken");
+                throw new ResponseException(403, "Error: Already Taken");
             }
             UserData userData = new UserData(request.username(), request.password(), request.email());
             userDAO.createUser(userData);
