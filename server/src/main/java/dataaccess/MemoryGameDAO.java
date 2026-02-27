@@ -2,14 +2,12 @@ package dataaccess;
 
 import chess.ChessGame;
 import model.GameData;
-import service.GameService;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 public class MemoryGameDAO implements GameDAO{
-    final Map<String, Integer> games = new HashMap<>();
+    final Map<Integer, GameData> games = new HashMap<>();
 
     @Override
     public void clear() {
@@ -17,22 +15,32 @@ public class MemoryGameDAO implements GameDAO{
     }
 
     @Override
-    public void createGame(GameData gameData) {
+    public void createGame(GameData gameData) throws DataAccessException {
+        if (games.get(gameData.gameID()) == null){
+            games.put(gameData.gameID(), gameData);
+        } else {
+            throw new DataAccessException("Game with this ID already exists");
+        }
 
     }
 
     @Override
     public GameData getGame(int gameID) {
-        return null;
+        return games.getOrDefault(gameID, null);
     }
 
     @Override
-    public List<ChessGame> listGames() {
-        return List.of();
+    public Collection<GameData> listGames() {
+        return games.values();
     }
 
     @Override
-    public void updateGame(int gameID) {
-
+    public void updateGame(int gameID, GameData gameData) throws DataAccessException {
+        if (games.containsKey(gameID)) {
+            games.put(gameID, gameData);
+        } else
+        {
+            throw new DataAccessException("GameID not found in database");
+        }
     }
 }

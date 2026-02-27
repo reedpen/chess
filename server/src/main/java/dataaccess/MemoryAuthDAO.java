@@ -32,13 +32,13 @@ public class MemoryAuthDAO implements AuthDAO{
         if (auths.containsKey(authToken)){
             auths.remove(authToken);
         } else {
-            throw new DataAccessException("Username not found in database");
+            throw new DataAccessException("auth token not found in database");
         }
 
     }
 
     @Override
-    public void deleteAllAuth() {
+    public void clear() {
         auths.clear();
     }
 }

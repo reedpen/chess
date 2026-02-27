@@ -1,12 +1,18 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.*;
+import model.AuthData;
+import model.GameData;
 import org.junit.jupiter.api.Test;
+import requestsandresults.ListGamesRequest;
 import requestsandresults.LoginRequest;
 import requestsandresults.RegisterRequest;
 import requestsandresults.UserResult;
 
-import javax.xml.crypto.Data;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ServiceTests {
     UserDAO userDAO = new MemoryUserDAO();
     AuthDAO authDAO = new MemoryAuthDAO();
+    GameDAO gameDAO = new MemoryGameDAO();
     @Test
     void registerPositive() throws ResponseException, DataAccessException {
         UserService service = new UserService(authDAO, userDAO);
@@ -49,7 +56,7 @@ public class ServiceTests {
         UserService service = new UserService(authDAO, userDAO);
         RegisterRequest regReq = new RegisterRequest("reed", "123", "reed@gmail.com");
         service.register(regReq);
-        authDAO.deleteAllAuth();
+        authDAO.clear();
         LoginRequest logReq = new LoginRequest("reed", "123");
         UserResult res = service.login(logReq);
         assertEquals(userDAO.getUserData(logReq.username()).password(), logReq.password());
@@ -62,7 +69,7 @@ public class ServiceTests {
         UserService service = new UserService(authDAO, userDAO);
         RegisterRequest req = new RegisterRequest("reed", "123", "reed@gmail.com");
         UserResult res = service.register(req);
-        authDAO.deleteAllAuth();
+        authDAO.clear();
         LoginRequest lReq = new LoginRequest("reed", "1213");
 
         ResponseException e = assertThrows(ResponseException.class, () -> service.login(lReq));
@@ -98,8 +105,25 @@ public class ServiceTests {
         UserService service = new UserService(authDAO, userDAO);
         RegisterRequest req = new RegisterRequest("reed", "123", "reed@gmail.com");
         UserResult res = service.register(req);
-        authDAO.deleteAllAuth();
+        authDAO.clear();
         ResponseException e = assertThrows(ResponseException.class, () -> service.logout(res.authToken()));
+    }
+
+    @Test
+    void listGamesPositive() throws ResponseException, DataAccessException {
+        GameService service = new GameService(authDAO, userDAO, gameDAO);
+        authDAO.createAuth(new AuthData("1", "r"));
+        GameData data = new GameData(1, "jason", "reed", "the game", new ChessGame());
+        GameData data2 = new GameData(2, "josh", "kaleb", "the game but 2", new ChessGame());
+        gameDAO.createGame(data);
+        gameDAO.createGame(data2);
+        Collection<GameData> list = new ArrayList<>();
+        Collection<GameData> actual = service.listGames(new ListGamesRequest("1")).games();
+        list.add(data);
+        list.add(data2);
+        assertEquals(list.size(), actual.size());
+        assertTrue(actual.containsAll(list));
+        System.out.println(list);
     }
 
 }
