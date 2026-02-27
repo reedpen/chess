@@ -4,7 +4,7 @@ import chess.ChessGame;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
-import dataaccess.UserDAO;
+
 import model.AuthData;
 import model.GameData;
 import requestsandresults.*;
@@ -12,12 +12,10 @@ import requestsandresults.*;
 
 public class GameService {
     private final AuthDAO authDAO;
-    private final UserDAO userDAO;
     private final GameDAO gameDAO;
 
-    public GameService(AuthDAO authDAO, UserDAO userDAO, GameDAO gameDAO) {
+    public GameService(AuthDAO authDAO, GameDAO gameDAO) {
         this.authDAO = authDAO;
-        this.userDAO = userDAO;
         this.gameDAO = gameDAO;
     }
 
@@ -27,18 +25,13 @@ public class GameService {
             if (authData == null) {
                 throw new ResponseException(401, "Error: unauthorized");
             }
+            return new ListGamesResult(gameDAO.listGames());
         } catch (DataAccessException e) {
-            throw new ResponseException(401, "Error: unauthorized");
+            throw new ResponseException(500, "Error: " + e.getMessage());
         }
-        return new ListGamesResult(gameDAO.listGames());
+
     }
 
-
-    public void clear() {
-        gameDAO.clear();
-        authDAO.clear();
-        userDAO.clear();
-    }
 
     public CreateGameResult createGame(String authToken, CreateGameRequest request) throws ResponseException {
         if (request == null || request.gameName() == null || request.gameName().isEmpty()) {
