@@ -17,21 +17,11 @@ public class UserService {
         this.userDAO = userDAO;
     }
 
-
-    private boolean isRegRequestBad(RegisterRequest request) {
-        return request.username() == null || request.username().isEmpty() ||
-                request.email() == null || request.email().isEmpty() ||
-                request.password() == null || request.password().isEmpty();
-    }
-    private boolean isLoginRequestBad(LoginRequest request) {
-        return request.username() == null || request.username().isEmpty() ||
-                request.password() == null || request.password().isEmpty();
-    }
-
     public UserResult register(RegisterRequest request) throws ResponseException{
 
-
-        if (isRegRequestBad(request)) {
+        if (request.username() == null || request.username().isEmpty() ||
+                request.email() == null || request.email().isEmpty() ||
+                request.password() == null || request.password().isEmpty()) {
             throw new ResponseException(400, "Error: bad request");
         }
 
@@ -51,7 +41,8 @@ public class UserService {
     }
 
     public UserResult login(LoginRequest request) throws ResponseException{
-        if (isLoginRequestBad(request)) {
+        if (request.username() == null || request.username().isEmpty() ||
+                request.password() == null || request.password().isEmpty()) {
             throw new ResponseException(400, "Error: bad request");
         }
 
