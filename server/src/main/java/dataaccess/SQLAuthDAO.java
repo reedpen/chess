@@ -1,6 +1,11 @@
 package dataaccess;
 
 import model.AuthData;
+import service.ResponseException;
+
+import javax.xml.crypto.Data;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class SQLAuthDAO implements AuthDAO {
     @Override
@@ -22,4 +27,6 @@ public class SQLAuthDAO implements AuthDAO {
     public void clear() {
 
     }
+
+
 }

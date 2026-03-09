@@ -1,5 +1,7 @@
 package dataaccess;
 
+import service.ResponseException;
+
 import java.sql.*;
 import java.util.Properties;
 
@@ -9,6 +11,48 @@ public class DatabaseManager {
     private static String dbPassword;
     private static String connectionUrl;
 
+    private final String[] createStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS  user (
+              `username` varchar(256) NOT NULL,
+              `password` varchar(256) NOT NULL,
+              `email` varchar(256) NOT NULL,
+              PRIMARY KEY (`username`)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS  game (
+              `id` INT NOT NULL AUTO_INCREMENT,
+              `white_username` varchar(256),
+              `black_username` varchar(256),
+              `game_name` varchar(256) NOT NULL,
+              `game_json` TEXT NOT NULL,
+              PRIMARY KEY (`id`)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS  auth (
+              `token` varchar(256) NOT NULL,
+              `username` varchar(256) NOT NULL,
+              PRIMARY KEY (`token`)
+            )
+            """
+    };
+
+
+
+    public static void configureDatabase() throws DataAccessException {
+        DatabaseManager.createDatabase();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            for (String statement : createStatements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
+        }
+    }
     /*
      * Load the database information for the db.properties file.
      */
