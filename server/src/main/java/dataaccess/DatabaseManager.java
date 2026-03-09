@@ -11,7 +11,7 @@ public class DatabaseManager {
     private static String dbPassword;
     private static String connectionUrl;
 
-    private final String[] createStatements = {
+    private static final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS  user (
               `username` varchar(256) NOT NULL,
