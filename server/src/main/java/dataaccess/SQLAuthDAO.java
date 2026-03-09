@@ -1,7 +1,6 @@
 package dataaccess;
 
 import model.AuthData;
-import service.ResponseException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -77,6 +76,4 @@ public class SQLAuthDAO implements AuthDAO {
         }
 
     }
-
-
 }
