@@ -3,6 +3,7 @@ import dataaccess.*;
 import model.AuthData;
 import model.UserData;
 import org.eclipse.jetty.server.Authentication;
+import org.mindrot.jbcrypt.BCrypt;
 import requestsandresults.*;
 
 import java.util.Objects;
@@ -33,7 +34,8 @@ public class UserService {
             if (userDAO.getUserData(request.username()) != null) {
                 throw new ResponseException(403, "Error: Already Taken");
             }
-            UserData userData = new UserData(request.username(), request.password(), request.email());
+            String hashedPassword = BCrypt.hashpw(request.password(), BCrypt.gensalt());
+            UserData userData = new UserData(request.username(), hashedPassword, request.email());
             userDAO.createUser(userData);
             String token = createAuthToken();
             authDAO.createAuth(new AuthData(token, request.username()));
@@ -52,7 +54,7 @@ public class UserService {
 
         try {
             UserData data = userDAO.getUserData(request.username());
-            if (data == null || !Objects.equals(request.password(), data.password())){
+            if (data == null || !BCrypt.checkpw(request.password(), data.password())){
                 throw new ResponseException(401, "Error: unauthorized");
             }
             String token = createAuthToken();

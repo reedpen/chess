@@ -5,7 +5,12 @@ import model.GameData;
 import java.util.Collection;
 import java.util.List;
 
+import static dataaccess.DatabaseManager.configureDatabase;
+
 public class SQLGameDAO implements GameDAO{
+    public SQLGameDAO() throws DataAccessException{
+        configureDatabase();
+    }
     @Override
     public void clear() {
 

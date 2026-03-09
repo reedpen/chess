@@ -24,7 +24,6 @@ public class MemoryAuthDAO implements AuthDAO{
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
         return auths.getOrDefault(authToken, null);
-
     }
 
     @Override
