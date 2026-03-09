@@ -11,9 +11,6 @@ import static dataaccess.DatabaseManager.configureDatabase;
 
 public class SQLAuthDAO implements AuthDAO {
 
-    public SQLAuthDAO() throws DataAccessException{
-        configureDatabase();
-    }
     @Override
     public void createAuth(AuthData auth) throws DataAccessException {
         var statement = "INSERT INTO auth (token, username) VALUES (?, ?)";
@@ -72,7 +69,7 @@ public class SQLAuthDAO implements AuthDAO {
             ps.executeUpdate();
 
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("Error: unable to insert user. %s", e.getMessage()));
+            throw new DataAccessException(String.format("Error: unable to clear auths. %s", e.getMessage()));
         }
 
     }

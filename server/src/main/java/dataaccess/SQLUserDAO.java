@@ -9,9 +9,6 @@ import java.sql.SQLException;
 import static dataaccess.DatabaseManager.configureDatabase;
 
 public class SQLUserDAO implements UserDAO{
-    public SQLUserDAO() throws DataAccessException{
-        configureDatabase();
-    }
     @Override
     public UserData getUserData(String username) throws DataAccessException {
         return null;
