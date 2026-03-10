@@ -1,23 +1,18 @@
 package dataaccess;
 
 import chess.ChessGame;
-import dataaccess.DataAccessException;
-import dataaccess.SQLUserDAO;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-import org.eclipse.jetty.server.Authentication;
 import org.junit.jupiter.api.*;
 
-import javax.xml.crypto.Data;
-
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
 import static dataaccess.DatabaseManager.configureDatabase;
 import static dataaccess.DatabaseManager.createDatabase;
 import static org.junit.jupiter.api.Assertions.*;
+
 public class SQLDAOTests {
     private SQLUserDAO userDAO;
     private SQLAuthDAO authDAO;
@@ -25,21 +20,27 @@ public class SQLDAOTests {
 
     @BeforeEach
     public void setup() throws DataAccessException {
+        initializeDaos();
+        createDatabase();
+        configureDatabase();
+        clearAllTables();
+    }
+
+    private void initializeDaos() throws DataAccessException {
         userDAO = new SQLUserDAO();
         authDAO = new SQLAuthDAO();
         gameDAO = new SQLGameDAO();
-        createDatabase();
-        configureDatabase();
+    }
+
+    private void clearAllTables() throws DataAccessException {
         userDAO.clear();
         authDAO.clear();
         gameDAO.clear();
-
     }
-
 
     // AUTH TESTS
     @Test
-    public void CreateAuthPositive() throws DataAccessException {
+    public void createAndGetAuthPositive() throws DataAccessException {
         AuthData expectedAuth = new AuthData("123", "username");
         authDAO.createAuth(expectedAuth);
         AuthData actualAuth = authDAO.getAuth("123");
@@ -49,55 +50,42 @@ public class SQLDAOTests {
     }
 
     @Test
-    public void CreateAuthNegative() throws DataAccessException {
+    public void createAuthNegative() throws DataAccessException {
         AuthData expectedAuth = new AuthData("123", "username");
         authDAO.createAuth(expectedAuth);
-        assertThrows(DataAccessException.class, () -> {
-            authDAO.createAuth(new AuthData("123", "john"));
-        });
-    }
-
-
-    @Test
-    public void GetAuthPositive() throws DataAccessException {
-        AuthData expectedAuth = new AuthData("123", "username");
-        authDAO.createAuth(expectedAuth);
-        AuthData actualAuth = authDAO.getAuth("123");
-        assertNotNull(actualAuth);
-        assertEquals(expectedAuth.username(), actualAuth.username());
-        assertEquals(expectedAuth.authToken(), actualAuth.authToken());
+        assertThrows(DataAccessException.class, () -> authDAO.createAuth(new AuthData("123", "john")));
     }
 
     @Test
-    public void GetAuthNegative() throws DataAccessException {
-
+    public void getAuthNegative() throws DataAccessException {
         AuthData actualAuth = authDAO.getAuth("nonExistentToken");
         assertNull(actualAuth);
     }
 
     @Test
-    public void DeleteAuthPositive() throws DataAccessException {
+    public void deleteAuthPositive() throws DataAccessException {
         AuthData expectedAuth = new AuthData("123", "username");
         authDAO.createAuth(expectedAuth);
         authDAO.deleteAuth("123");
         assertNull(authDAO.getAuth("123"));
     }
+
     @Test
-    public void DeleteAuthNegative() throws DataAccessException {
-        assertThrows(DataAccessException.class, () -> {
-            authDAO.deleteAuth("nonExistentToken");
-        });
+    public void deleteAuthNegative() {
+        assertThrows(DataAccessException.class, () -> authDAO.deleteAuth("nonExistentToken"));
     }
+
     @Test
-    public void AuthClear() throws DataAccessException {
+    public void authClear() throws DataAccessException {
         AuthData expectedAuth = new AuthData("123", "username");
         authDAO.createAuth(expectedAuth);
         authDAO.clear();
         assertNull(authDAO.getAuth("123"));
     }
+
     // USER TESTS
     @Test
-    public void CreateUserPositive() throws DataAccessException {
+    public void createAndGetUserPositive() throws DataAccessException {
         UserData expectedUser = new UserData("reed", "pwordhashed", "reed@reed.reed");
         userDAO.createUser(expectedUser);
         UserData actualUser = userDAO.getUserData("reed");
@@ -108,33 +96,20 @@ public class SQLDAOTests {
     }
 
     @Test
-    public void CreateUserNegative() throws DataAccessException {
+    public void createUserNegative() throws DataAccessException {
         UserData expectedUser = new UserData("reed", "reedpassword", "g@mail.com");
         userDAO.createUser(expectedUser);
-        assertThrows(DataAccessException.class, () -> {
-            userDAO.createUser(new UserData("reed", "reedpassword", "g@mail.com"));
-        });
+        assertThrows(DataAccessException.class, () -> userDAO.createUser(new UserData("reed", "reedpassword", "g@mail.com")));
     }
 
     @Test
-    public void GetUserPositive() throws DataAccessException {
-        UserData expectedUser = new UserData("reed", "pwordhashed", "reed@reed.reed");
-        userDAO.createUser(expectedUser);
-        UserData actualUser = userDAO.getUserData("reed");
-        assertNotNull(actualUser);
-        assertEquals(expectedUser.username(), actualUser.username());
-        assertEquals(expectedUser.password(), actualUser.password());
-        assertEquals(expectedUser.email(), actualUser.email());
-    }
-
-    @Test
-    public void GetUserNegative() throws DataAccessException {
+    public void getUserNegative() throws DataAccessException {
         UserData actualUser = userDAO.getUserData("nonExistentUser");
-
         assertNull(actualUser);
     }
+
     @Test
-    public void UserClear() throws DataAccessException {
+    public void userClear() throws DataAccessException {
         UserData expectedUser = new UserData("123", "username", "1234");
         userDAO.createUser(expectedUser);
         userDAO.clear();
@@ -144,15 +119,15 @@ public class SQLDAOTests {
 
     // GAME TESTS
     @Test
-    public void GameClear() throws DataAccessException {
+    public void gameClear() throws DataAccessException {
         GameData expectedGame = new GameData(1, "reed", "jason", "reed and jason's game", new ChessGame());
         gameDAO.createGame(expectedGame);
         gameDAO.clear();
         assertNull(gameDAO.getGame(1));
     }
-    @Test
-    public void CreateGamePositive() throws DataAccessException {
 
+    @Test
+    public void createAndGetGamePositive() throws DataAccessException {
         GameData expectedGame = new GameData(1, "reed", "jason", "reed and jason's game", new ChessGame());
         gameDAO.createGame(expectedGame);
         GameData actualGame = gameDAO.getGame(1);
@@ -165,45 +140,25 @@ public class SQLDAOTests {
     }
 
     @Test
-    public void CreateGameNegative() throws DataAccessException {
+    public void createGameNegative() throws DataAccessException {
         GameData expectedGame = new GameData(1, "reed", "jason", "reed and jason's game", new ChessGame());
         gameDAO.createGame(expectedGame);
-        assertThrows(DataAccessException.class, () -> {
-            gameDAO.createGame(new GameData(1, null, null, "reed's game", null));
-        });
-    }
-
-
-    @Test
-    public void GetGamePositive() throws DataAccessException {
-
-        GameData expectedGame = new GameData(1, "reed", "jason", "reed and jason's game", new ChessGame());
-        gameDAO.createGame(expectedGame);
-        GameData actualGame = gameDAO.getGame(1);
-        assertNotNull(actualGame);
-        assertEquals(expectedGame.gameID(), actualGame.gameID());
-        assertEquals(expectedGame.whiteUsername(), actualGame.whiteUsername());
-        assertEquals(expectedGame.blackUsername(), actualGame.blackUsername());
-        assertEquals(expectedGame.gameName(), actualGame.gameName());
-        assertEquals(expectedGame.game(), actualGame.game());
+        assertThrows(DataAccessException.class, () -> gameDAO.createGame(new GameData(1, null, null, "reed's game", null)));
     }
 
     @Test
-    public void GetGameNegative() throws DataAccessException {
+    public void getGameNegative() throws DataAccessException {
         GameData actualGame = gameDAO.getGame(9999);
         assertNull(actualGame);
     }
 
     @Test
-    public void CreateGameNegative2() throws DataAccessException {
-        // Testing failure when attempting to create a game with null values for required fields
-        assertThrows(DataAccessException.class, () -> {
-            gameDAO.createGame(new GameData(2, null, null, null, null));
-        });
+    public void createGameNegativeNullFields() {
+        assertThrows(DataAccessException.class, () -> gameDAO.createGame(new GameData(2, null, null, null, null)));
     }
 
     @Test
-    public void ListGamesPositive() throws DataAccessException {
+    public void listGamesPositive() throws DataAccessException {
         HashSet<GameData> set = new HashSet<>();
         GameData expectedGame = new GameData(1, "reed", "jason", "reed and jason's game", new ChessGame());
         GameData expectedGame2 = new GameData(2, "reed", "jason", "reed and jason's game", new ChessGame());
@@ -214,7 +169,6 @@ public class SQLDAOTests {
         set.add(expectedGame3);
         set.add(expectedGame);
         set.add(expectedGame4);
-
 
         gameDAO.createGame(expectedGame);
         gameDAO.createGame(expectedGame2);
@@ -228,16 +182,15 @@ public class SQLDAOTests {
     }
 
     @Test
-    public void ListGamesNegative() throws DataAccessException {
+    public void listGamesNegative() throws DataAccessException {
         gameDAO.clear();
         Collection<GameData> output = gameDAO.listGames();
-
         assertNotNull(output);
         assertTrue(output.isEmpty());
     }
 
     @Test
-    public void UpdateGamePositive() throws DataAccessException {
+    public void updateGamePositive() throws DataAccessException {
         GameData initialGame = new GameData(1, "whiteUser", "blackUser", "MyGame", new ChessGame());
         gameDAO.createGame(initialGame);
 
@@ -250,7 +203,7 @@ public class SQLDAOTests {
     }
 
     @Test
-    public void UpdateGameNegative() throws DataAccessException {
+    public void updateGameNegative() throws DataAccessException {
         try (java.sql.Connection conn = DatabaseManager.getConnection();
              java.sql.PreparedStatement ps = conn.prepareStatement("DROP TABLE IF EXISTS game")) {
             ps.executeUpdate();
@@ -259,10 +212,7 @@ public class SQLDAOTests {
         }
 
         GameData testData = new GameData(1, "white", "black", "game", new ChessGame());
-
-        assertThrows(DataAccessException.class, () -> {
-            gameDAO.updateGame(testData);
-        });
+        assertThrows(DataAccessException.class, () -> gameDAO.updateGame(testData));
 
         DatabaseManager.configureDatabase();
     }
