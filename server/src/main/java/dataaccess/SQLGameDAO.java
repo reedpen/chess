@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 
 public class SQLGameDAO implements GameDAO{
     Gson gson = new Gson();
@@ -30,13 +29,15 @@ public class SQLGameDAO implements GameDAO{
 
     @Override
     public int createGame(GameData gameData) throws DataAccessException {
-        var statement = "INSERT INTO game (id, white_username, black_username, game_name, game_json) VALUES (?, null, null, ?, ?)";
+        var statement = "INSERT INTO game (id, white_username, black_username, game_name, game_json) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(statement)) {
 
             ps.setInt(1, PreparedStatement.RETURN_GENERATED_KEYS);
-            ps.setString(2, gameData.gameName());
-            ps.setString(3, gson.toJson(gameData.game()));
+            ps.setString(2, gameData.whiteUsername());
+            ps.setString(3, gameData.blackUsername());
+            ps.setString(4, gameData.gameName());
+            ps.setString(5, gson.toJson(gameData.game()));
             ps.executeUpdate();
             return gameData.gameID();
 
