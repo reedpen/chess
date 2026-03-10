@@ -1,9 +1,11 @@
 package dataaccess;
 
+import model.AuthData;
 import model.UserData;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static dataaccess.DatabaseManager.configureDatabase;
@@ -11,6 +13,21 @@ import static dataaccess.DatabaseManager.configureDatabase;
 public class SQLUserDAO implements UserDAO{
     @Override
     public UserData getUserData(String username) throws DataAccessException {
+        String query = "SELECT username, password, email FROM user WHERE username = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setString(1, username);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new UserData(rs.getString("username"), rs.getString("password"), rs.getString("email"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("Error: unable to get user. %s", e.getMessage()));
+        }
         return null;
     }
 
@@ -32,7 +49,15 @@ public class SQLUserDAO implements UserDAO{
     }
 
     @Override
-    public void clear() {
+    public void clear() throws DataAccessException{
+        var statement = "TRUNCATE user";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(statement)) {
+            ps.executeUpdate();
+
+        } catch (SQLException | DataAccessException e) {
+            throw new DataAccessException(String.format("Error: unable to clear users. %s", e.getMessage()));
+        }
 
     }
 }
