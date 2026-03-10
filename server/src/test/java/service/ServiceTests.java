@@ -5,19 +5,36 @@ import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
 import requestsandresults.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static dataaccess.DatabaseManager.configureDatabase;
+import static dataaccess.DatabaseManager.createDatabase;
 import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ServiceTests {
-    UserDAO userDAO = new MemoryUserDAO();
-    AuthDAO authDAO = new MemoryAuthDAO();
-    GameDAO gameDAO = new MemoryGameDAO();
+    UserDAO userDAO = new SQLUserDAO();
+    AuthDAO authDAO = new SQLAuthDAO();
+    GameDAO gameDAO = new SQLGameDAO();
+
+    @BeforeEach
+    public void setup() throws DataAccessException {
+        userDAO = new SQLUserDAO();
+        authDAO = new SQLAuthDAO();
+        gameDAO = new SQLGameDAO();
+        createDatabase();
+        configureDatabase();
+        userDAO.clear();
+        authDAO.clear();
+        gameDAO.clear();
+
+    }
     @Test
     void registerPositive() throws ResponseException, DataAccessException {
         UserService service = new UserService(authDAO, userDAO);
@@ -56,7 +73,7 @@ public class ServiceTests {
         authDAO.clear();
         LoginRequest logReq = new LoginRequest("reed", "123");
         UserResult res = service.login(logReq);
-        assertEquals(userDAO.getUserData(logReq.username()).password(), logReq.password());
+        assertTrue(BCrypt.checkpw(logReq.password(), userDAO.getUserData(logReq.username()).password()));
         assertEquals(userDAO.getUserData(logReq.username()).username(), logReq.username());
         assertNotNull(authDAO.getAuth(res.authToken()));
     }

@@ -9,15 +9,18 @@ import service.ClearService;
 import service.GameService;
 import service.UserService;
 
+import static dataaccess.DatabaseManager.configureDatabase;
+import static dataaccess.DatabaseManager.createDatabase;
+
 public class Server {
 
     private final Javalin javalin;
 
     public Server() {
 
-        UserDAO userDAO = new MemoryUserDAO();
-        GameDAO gameDAO = new MemoryGameDAO();
-        AuthDAO authDAO = new MemoryAuthDAO();
+        UserDAO userDAO = new SQLUserDAO();
+        GameDAO gameDAO = new SQLGameDAO();
+        AuthDAO authDAO = new SQLAuthDAO();
 
         UserService userService = new UserService(authDAO, userDAO);
         GameService gameService = new GameService(authDAO, gameDAO);

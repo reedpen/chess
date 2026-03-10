@@ -37,6 +37,7 @@ public class UserHandler {
     }
 
     public void logout(Context ctx) throws ResponseException {
+
         String token = ctx.header("authorization");
         userService.logout(token);
         ctx.status(200);

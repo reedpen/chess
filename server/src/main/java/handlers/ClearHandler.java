@@ -11,8 +11,13 @@ public class ClearHandler {
     }
 
     public void clear(Context ctx) throws DataAccessException {
-        clearService.clear();
-        ctx.status(200);
-        ctx.result("{}");
+        try {
+            clearService.clear();
+            ctx.status(200).result("{}");
+        } catch (RuntimeException e) { // Catch the exception thrown by your service
+            ctx.status(500);
+            ctx.result(String.format("{ \"message\": \"%s\" }", e.getMessage()));
+        }
+
     }
 }

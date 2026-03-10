@@ -42,7 +42,7 @@ public class UserService {
             return new UserResult(request.username(), token);
         }
         catch (DataAccessException e) {
-            throw new ResponseException(500,e.getMessage());
+            throw new ResponseException(500,"Error: " + e.getMessage());
         }
     }
 
@@ -69,14 +69,14 @@ public class UserService {
 
     public void logout(String authToken) throws ResponseException {
         try {
+            if (authDAO.getAuth(authToken) == null) {
+                throw new ResponseException(401, "Error: unauthorized");
+            }
             authDAO.deleteAuth(authToken);
         }
         catch(DataAccessException e) {
-            throw new ResponseException(401, "Error: unauthorized");
+            throw new ResponseException(500, "Internal Error");
         }
-
     }
-
-
 
 }

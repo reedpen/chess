@@ -9,8 +9,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static dataaccess.DatabaseManager.configureDatabase;
+import static dataaccess.DatabaseManager.createDatabase;
 
 public class SQLUserDAO implements UserDAO{
+
+
+    public void SQLUserDAO() throws DataAccessException {
+        createDatabase();
+        configureDatabase();
+    }
+
     @Override
     public UserData getUserData(String username) throws DataAccessException {
         String query = "SELECT username, password, email FROM user WHERE username = ?";
