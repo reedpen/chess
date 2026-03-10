@@ -53,12 +53,14 @@ public class SQLAuthDAO implements AuthDAO {
              PreparedStatement ps = conn.prepareStatement(statement)) {
 
             ps.setString(1, auth);
-            ps.executeUpdate();
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new DataAccessException("Error: Token not found.");
+            }
 
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("Error: unable to delete user. %s", e.getMessage()));
+            throw new DataAccessException(String.format("Error: unable to delete auth token. %s", e.getMessage()));
         }
-
     }
 
     @Override
