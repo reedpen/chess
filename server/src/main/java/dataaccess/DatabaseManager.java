@@ -11,7 +11,7 @@ public class DatabaseManager {
     private static String dbPassword;
     private static String connectionUrl;
 
-    private static final String[] createStatements = {
+    private static final String[] CreateStatements = {
             """
             CREATE TABLE IF NOT EXISTS  user (
               `username` varchar(256) NOT NULL,
@@ -44,7 +44,7 @@ public class DatabaseManager {
     public static void configureDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
         try (Connection conn = DatabaseManager.getConnection()) {
-            for (String statement : createStatements) {
+            for (String statement : CreateStatements) {
                 try (var preparedStatement = conn.prepareStatement(statement)) {
                     preparedStatement.executeUpdate();
                 }

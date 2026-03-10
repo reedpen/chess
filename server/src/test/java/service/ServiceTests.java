@@ -23,6 +23,9 @@ public class ServiceTests {
     AuthDAO authDAO = new SQLAuthDAO();
     GameDAO gameDAO = new SQLGameDAO();
 
+    public ServiceTests() throws DataAccessException {
+    }
+
     @BeforeEach
     public void setup() throws DataAccessException {
         userDAO = new SQLUserDAO();

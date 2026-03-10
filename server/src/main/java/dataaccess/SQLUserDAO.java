@@ -14,9 +14,13 @@ import static dataaccess.DatabaseManager.createDatabase;
 public class SQLUserDAO implements UserDAO{
 
 
-    public void SQLUserDAO() throws DataAccessException {
-        createDatabase();
-        configureDatabase();
+    public SQLUserDAO() {
+        try {
+            createDatabase();
+            configureDatabase();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
