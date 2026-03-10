@@ -11,6 +11,10 @@ import org.junit.jupiter.api.*;
 
 import javax.xml.crypto.Data;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+
 import static dataaccess.DatabaseManager.configureDatabase;
 import static dataaccess.DatabaseManager.createDatabase;
 import static org.junit.jupiter.api.Assertions.*;
@@ -165,9 +169,10 @@ public class SQLDAOTests {
         GameData expectedGame = new GameData(1, "reed", "jason", "reed and jason's game", new ChessGame());
         gameDAO.createGame(expectedGame);
         assertThrows(DataAccessException.class, () -> {
-            gameDAO.createGame(new GameData(1, null, null, "reed's game", new ChessGame()));
+            gameDAO.createGame(new GameData(1, null, null, "reed's game", null));
         });
     }
+
 
     @Test
     public void GetGamePositive() throws DataAccessException {
@@ -191,11 +196,74 @@ public class SQLDAOTests {
 
     @Test
     public void CreateGameNegative2() throws DataAccessException {
-        GameData expectedGame = new GameData(1, "reed", "jason", "reed and jason's game", new ChessGame());
-        gameDAO.createGame(expectedGame);
+        // Testing failure when attempting to create a game with null values for required fields
         assertThrows(DataAccessException.class, () -> {
-            gameDAO.createGame(new GameData(1, null, null, "reed's game", new ChessGame()));
+            gameDAO.createGame(new GameData(2, null, null, null, null));
         });
     }
 
+    @Test
+    public void ListGamesPositive() throws DataAccessException {
+        HashSet<GameData> set = new HashSet<>();
+        GameData expectedGame = new GameData(1, "reed", "jason", "reed and jason's game", new ChessGame());
+        GameData expectedGame2 = new GameData(2, "reed", "jason", "reed and jason's game", new ChessGame());
+        GameData expectedGame3 = new GameData(3, "reed", "jason", "reed and jason's game", new ChessGame());
+        GameData expectedGame4 = new GameData(4, "reed", "jason", "reed and jason's game", new ChessGame());
+
+        set.add(expectedGame2);
+        set.add(expectedGame3);
+        set.add(expectedGame);
+        set.add(expectedGame4);
+
+
+        gameDAO.createGame(expectedGame);
+        gameDAO.createGame(expectedGame2);
+        gameDAO.createGame(expectedGame3);
+        gameDAO.createGame(expectedGame4);
+        Collection<GameData> output = gameDAO.listGames();
+        assertEquals(4, output.size());
+        for (GameData data : output) {
+            assertTrue(set.contains(data));
+        }
+    }
+
+    @Test
+    public void ListGamesNegative() throws DataAccessException {
+        gameDAO.clear();
+        Collection<GameData> output = gameDAO.listGames();
+
+        assertNotNull(output);
+        assertTrue(output.isEmpty());
+    }
+
+    @Test
+    public void UpdateGamePositive() throws DataAccessException {
+        GameData initialGame = new GameData(1, "whiteUser", "blackUser", "MyGame", new ChessGame());
+        gameDAO.createGame(initialGame);
+
+        GameData updatedGame = new GameData(1, "newWhite", "newBlack", "MyGame", new ChessGame());
+        gameDAO.updateGame(updatedGame);
+
+        GameData fetchedGame = gameDAO.getGame(1);
+        assertEquals("newWhite", fetchedGame.whiteUsername());
+        assertEquals("newBlack", fetchedGame.blackUsername());
+    }
+
+    @Test
+    public void UpdateGameNegative() throws DataAccessException {
+        try (java.sql.Connection conn = DatabaseManager.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement("DROP TABLE IF EXISTS game")) {
+            ps.executeUpdate();
+        } catch (java.sql.SQLException e) {
+            fail("Test setup failed: unable to drop table.");
+        }
+
+        GameData testData = new GameData(1, "white", "black", "game", new ChessGame());
+
+        assertThrows(DataAccessException.class, () -> {
+            gameDAO.updateGame(testData);
+        });
+
+        DatabaseManager.configureDatabase();
+    }
 }

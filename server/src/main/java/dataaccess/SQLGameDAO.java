@@ -27,22 +27,35 @@ public class SQLGameDAO implements GameDAO{
 
     }
 
-    @Override
     public int createGame(GameData gameData) throws DataAccessException {
-        var statement = "INSERT INTO game (id, white_username, black_username, game_name, game_json) VALUES (?, ?, ?, ?, ?)";
+        if (gameData == null) {
+            throw new DataAccessException("Error: bad request. GameData cannot be null.");
+        }
+        if (gameData.gameName() == null || gameData.gameName().trim().isEmpty()) {
+            throw new DataAccessException("Error: bad request. Game name is required.");
+        }
+        if (gameData.game() == null) {
+            throw new DataAccessException("Error: bad request. Game state is required.");
+        }
+        var statement = "INSERT INTO game (white_username, black_username, game_name, game_json) VALUES (?, ?, ?, ?)";
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement ps = conn.prepareStatement(statement)) {
+             PreparedStatement ps = conn.prepareStatement(statement, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
-            ps.setInt(1, PreparedStatement.RETURN_GENERATED_KEYS);
-            ps.setString(2, gameData.whiteUsername());
-            ps.setString(3, gameData.blackUsername());
-            ps.setString(4, gameData.gameName());
-            ps.setString(5, gson.toJson(gameData.game()));
+            ps.setString(1, gameData.whiteUsername());
+            ps.setString(2, gameData.blackUsername());
+            ps.setString(3, gameData.gameName());
+            ps.setString(4, gson.toJson(gameData.game()));
             ps.executeUpdate();
-            return gameData.gameID();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+            throw new DataAccessException("Failed to retrieve generated game ID.");
 
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("Error: unable to create game. %s", e.getMessage()));
+            throw new DataAccessException(String.format("Error: unable to create game.%s", e.getMessage()));
         }
     }
 
@@ -112,9 +125,9 @@ public class SQLGameDAO implements GameDAO{
             ps.setString(4, gson.toJson(gameData.game()));
             ps.setInt(5, gameData.gameID());
 
-            try (ResultSet rs = ps.executeQuery()) {
+            // CORRECTED: Use executeUpdate for UPDATE statements
+            ps.executeUpdate();
 
-            }
         } catch (SQLException e) {
             throw new DataAccessException(String.format("Error: unable to update game. %s", e.getMessage()));
         }
