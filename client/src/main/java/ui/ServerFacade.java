@@ -4,7 +4,9 @@ import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import requestsandresults.CreateGameResult;
 import requestsandresults.ListGamesResult;
+import requestsandresults.UserResult;
 import service.ResponseException;
 
 import java.net.*;
@@ -22,7 +24,7 @@ public class ServerFacade {
         this.client = HttpClient.newHttpClient();
     }
 
-    public UserData register(UserData data) throws ResponseException {
+    public UserResult register(UserData data) throws ResponseException {
         String jsonBody = gson.toJson(data);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + "/user"))
@@ -30,10 +32,10 @@ public class ServerFacade {
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
 
-        return executeRequest(request, UserData.class);
+        return executeRequest(request, UserResult.class);
     }
 
-    public UserData login(UserData data) throws ResponseException {
+    public UserResult login(UserData data) throws ResponseException {
         String jsonBody = gson.toJson(data);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + "/session"))
@@ -41,7 +43,7 @@ public class ServerFacade {
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
 
-        return executeRequest(request, UserData.class);
+        return executeRequest(request, UserResult.class);
     }
 
     public void logout(AuthData data) throws ResponseException {
@@ -65,7 +67,7 @@ public class ServerFacade {
     }
 
 
-    public void createGame(AuthData authData, GameData gameRequest) throws ResponseException {
+    public CreateGameResult createGame(AuthData authData, GameData gameRequest) throws ResponseException {
         String jsonBody = gson.toJson(gameRequest);
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -75,7 +77,7 @@ public class ServerFacade {
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
 
-        executeRequest(request, GameData.class);
+        return executeRequest(request, CreateGameResult.class);
     }
 
     public void joinGame(AuthData authData, GameData gameRequest) throws ResponseException {
