@@ -34,17 +34,33 @@ public class ClientMain {
             String inputQuery = String.format(SET_TEXT_COLOR_WHITE+"[%s] >>> ", logged);
             System.out.print(inputQuery);
             String line = scanner.nextLine();
+            if (!auth) {
+                try {
+                    result = prelogin.eval(line, server);
+                    if (result.contains("registered") || result.contains("signed in")) {
+                        auth = true;
+                    }
+                    System.out.println(SET_TEXT_COLOR_BLUE + result);
 
-            try {
-                result = prelogin.eval(line, server);
 
-                System.out.println(SET_TEXT_COLOR_BLUE + result);
-
-
-            } catch (Throwable e) {
-                var msg = e.toString();
-                System.out.print(msg);
+                } catch (Throwable e) {
+                    var msg = e.toString();
+                    System.out.print(msg);
+                }
             }
+            else {
+                try {
+                    result = postlogin.eval(line, server);
+
+                    System.out.println(SET_TEXT_COLOR_BLUE + result);
+
+
+                } catch (Throwable e) {
+                    var msg = e.toString();
+                    System.out.print(msg);
+                }
+            }
+
         }
     }
     public static void postRepl(Scanner scanner){

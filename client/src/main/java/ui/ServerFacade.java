@@ -4,9 +4,7 @@ import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-import requestsandresults.CreateGameResult;
-import requestsandresults.ListGamesResult;
-import requestsandresults.UserResult;
+import requestsandresults.*;
 import service.ResponseException;
 
 import java.net.*;
@@ -24,7 +22,7 @@ public class ServerFacade {
         this.client = HttpClient.newHttpClient();
     }
 
-    public UserResult register(UserData data) throws ResponseException {
+    public UserResult register(RegisterRequest data) throws ResponseException {
         String jsonBody = gson.toJson(data);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + "/user"))
@@ -35,7 +33,7 @@ public class ServerFacade {
         return executeRequest(request, UserResult.class);
     }
 
-    public UserResult login(UserData data) throws ResponseException {
+    public UserResult login(LoginRequest data) throws ResponseException {
         String jsonBody = gson.toJson(data);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + "/session"))
@@ -80,13 +78,12 @@ public class ServerFacade {
         return executeRequest(request, CreateGameResult.class);
     }
 
-    public void joinGame(AuthData authData, GameData gameRequest) throws ResponseException {
-        String jsonBody = gson.toJson(gameRequest);
+    public void joinGame(JoinGameRequest data) throws ResponseException {
+        String jsonBody = gson.toJson(data);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + "/game"))
-                .header("authorization", authData.authToken())
-                .header("Content-Type", "application/json") // Required when sending a JSON body
+                .header("Content-Type", "application/json")
                 .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
 
