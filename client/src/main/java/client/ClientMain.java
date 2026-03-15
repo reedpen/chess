@@ -20,7 +20,7 @@ public class ClientMain {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        ServerFacade server = new ServerFacade(url);
+        ServerFacade server = new ServerFacade("http://localhost:8080");
         preRepl(scanner, server);
         System.out.println();
     }
@@ -38,7 +38,7 @@ public class ClientMain {
             try {
                 result = prelogin.eval(line, server);
 
-                System.out.print(SET_TEXT_COLOR_BLUE + result);
+                System.out.println(SET_TEXT_COLOR_BLUE + result);
 
 
             } catch (Throwable e) {
