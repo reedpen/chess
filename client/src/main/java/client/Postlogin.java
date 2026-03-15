@@ -4,8 +4,7 @@ import service.ResponseException;
 
 import java.util.Arrays;
 
-public class Postlogin {
-
+public class Postlogin{
 
 
 
