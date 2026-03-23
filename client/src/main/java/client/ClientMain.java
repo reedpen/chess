@@ -52,7 +52,6 @@ public class ClientMain {
 
     public void setAuthData(AuthData authData) {
         this.currentAuth = authData;
-        // Inject the newly acquired authData into the Postlogin state
         this.postlogin = new Postlogin(this.currentAuth);
     }
 

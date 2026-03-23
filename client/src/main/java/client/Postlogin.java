@@ -1,17 +1,19 @@
 package client;
 
+import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import requestsandresults.CreateGameRequest;
 import requestsandresults.JoinGameRequest;
 import requestsandresults.ListGamesResult;
-import requestsandresults.LoginRequest;
-import server.Server;
 import service.ResponseException;
 import ui.ServerFacade;
 
 import java.util.Arrays;
 import java.util.Collection;
+
+import static ui.Board.printBlackBoard;
+import static ui.Board.printWhiteBoard;
 
 public class Postlogin{
 
@@ -59,20 +61,64 @@ public class Postlogin{
                 int gameID = Integer.parseInt(params[1]);
 
                 server.joinGame(authData, new JoinGameRequest(color, gameID));
+                ListGamesResult result = server.listGames(authData);
+                ChessGame targetGame = null;
+                if (result.games() != null) {
+                    for (GameData game : result.games()) {
+                        if (game.gameID() == gameID) {
+                            targetGame = game.game();
+                            break;
+                        }
+                    }
+                }
+                if (targetGame == null) {
+                    throw new ResponseException(400, "Error: Could not retrieve game state.");
+                }
+                if (color.equals("WHITE")) {
+                    printWhiteBoard(targetGame.getBoard());
+                } else if (color.equals("BLACK")) {
+                    printBlackBoard(targetGame.getBoard());
+                } else {
+                    throw new ResponseException(400, "Error: Color must be WHITE or BLACK.");
+                }
                 return String.format("Successfully joined game %d as %s.", gameID, color);
             } catch (NumberFormatException e) {
                 throw new ResponseException(400, "Error: gameID must be a number.");
             }
         }
         throw new ResponseException(400, "Expected: join <color> <gameID>");
+
     }
-    public String observeGame(ServerFacade server, String... params) throws ResponseException{
+    public String observeGame(ServerFacade server, String... params) throws ResponseException {
         if (params.length == 1) {
             try {
                 int gameID = Integer.parseInt(params[0]);
 
+                // 1. Join as an observer (empty color)
                 server.joinGame(authData, new JoinGameRequest("", gameID));
+
+                // 2. Fetch the game state to get the board
+                ListGamesResult result = server.listGames(authData);
+                chess.ChessGame targetGame = null;
+
+                if (result.games() != null) {
+                    for (GameData game : result.games()) {
+                        if (game.gameID() == gameID) {
+                            targetGame = game.game();
+                            break;
+                        }
+                    }
+                }
+
+                if (targetGame == null) {
+                    throw new ResponseException(400, "Error: Could not retrieve game state.");
+                }
+
+                // 3. Draw the board (Observers default to White perspective)
+                printWhiteBoard(targetGame.getBoard());
+
                 return String.format("Now observing game %d.", gameID);
+
             } catch (NumberFormatException e) {
                 throw new ResponseException(400, "Error: gameID must be a number.");
             }
