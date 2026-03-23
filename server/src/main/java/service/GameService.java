@@ -52,7 +52,7 @@ public class GameService {
     }
 
     public void joinGame(String authToken, JoinGameRequest request) throws ResponseException {
-        if (request == null || authToken == null  || request.playerColor() == null|| request.playerColor().isEmpty()) {
+        if (request == null || authToken == null) {
             throw new ResponseException(400, "Error: bad request");
         }
         try {
@@ -65,14 +65,21 @@ public class GameService {
             if (oldData == null) {
                 throw new ResponseException(400, "Error: bad request");
             }
+
+            String color = request.playerColor();
+            if (color == null || color.isEmpty()) {
+                return;
+            }
+
             GameData newData;
             String username = authData.username();
-            if ("WHITE".equals(request.playerColor())) {
+
+            if ("WHITE".equals(color)) {
                 if (oldData.whiteUsername() != null) {
                     throw new ResponseException(403, "Error: already taken");
                 }
                 newData = new GameData(oldData.gameID(), username, oldData.blackUsername(), oldData.gameName(), oldData.game());
-            } else if ("BLACK".equals(request.playerColor())) {
+            } else if ("BLACK".equals(color)) {
                 if (oldData.blackUsername() != null) {
                     throw new ResponseException(403, "Error: already taken");
                 }
@@ -80,11 +87,10 @@ public class GameService {
             } else {
                 throw new ResponseException(400, "Error: bad request");
             }
+
             gameDAO.updateGame(newData);
         } catch (DataAccessException e) {
             throw new ResponseException(500, "Error: " + e.getMessage());
         }
-
-
     }
 }
