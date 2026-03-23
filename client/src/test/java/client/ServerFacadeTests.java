@@ -4,7 +4,7 @@ import model.AuthData;
 import org.junit.jupiter.api.*;
 import requestsandresults.*;
 import server.Server;
-import service.ResponseException;
+import chess.ResponseException;
 import ui.ServerFacade;
 
 import java.net.URI;

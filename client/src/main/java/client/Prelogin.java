@@ -1,12 +1,10 @@
 package client;
 
 import model.AuthData;
-import model.UserData;
 import requestsandresults.LoginRequest;
 import requestsandresults.RegisterRequest;
 import requestsandresults.UserResult;
-import server.Server;
-import service.ResponseException;
+import chess.ResponseException;
 import ui.ServerFacade;
 
 import java.util.Arrays;

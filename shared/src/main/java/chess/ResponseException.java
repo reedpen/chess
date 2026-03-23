@@ -1,4 +1,4 @@
-package service;
+package chess;
 
 public class ResponseException extends RuntimeException {
     private final int statusCode;

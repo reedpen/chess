@@ -1,12 +1,10 @@
 package service;
+import chess.ResponseException;
 import dataaccess.*;
 import model.AuthData;
 import model.UserData;
-import org.eclipse.jetty.server.Authentication;
 import org.mindrot.jbcrypt.BCrypt;
-import requestsandresults.*;
 
-import java.util.Objects;
 import java.util.UUID;
 
 
@@ -22,7 +20,7 @@ public class UserService {
     public static String createAuthToken(){
         return UUID.randomUUID().toString();
     }
-    public UserResult register(RegisterRequest request) throws ResponseException{
+    public UserResult register(RegisterRequest request) throws ResponseException {
 
         if (request.username() == null || request.username().isEmpty() ||
                 request.email() == null || request.email().isEmpty() ||

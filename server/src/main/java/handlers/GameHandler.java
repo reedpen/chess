@@ -2,9 +2,8 @@ package handlers;
 
 import com.google.gson.Gson;
 import io.javalin.http.Context;
-import requestsandresults.*;
 import service.GameService;
-import service.ResponseException;
+import chess.ResponseException;
 
 
 public class GameHandler {

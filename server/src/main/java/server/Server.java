@@ -1,5 +1,6 @@
 package server;
 
+import chess.ResponseException;
 import dataaccess.*;
 import handlers.ClearHandler;
 import handlers.GameHandler;
@@ -8,9 +9,6 @@ import io.javalin.*;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
-
-import static dataaccess.DatabaseManager.configureDatabase;
-import static dataaccess.DatabaseManager.createDatabase;
 
 public class Server {
 
@@ -41,7 +39,7 @@ public class Server {
         javalin.delete("/db", clearHandler::clear);
 
         // Register your endpoints and exception handlers here.
-        javalin.exception(service.ResponseException.class, (ex, ctx) -> {
+        javalin.exception(ResponseException.class, (ex, ctx) -> {
             ctx.status(ex.statusCode());
             ctx.result(new com.google.gson.Gson().toJson(java.util.Map.of("message", ex.getMessage())));
         });

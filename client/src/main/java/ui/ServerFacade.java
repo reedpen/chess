@@ -2,14 +2,10 @@ package ui;
 
 import com.google.gson.Gson;
 import model.AuthData;
-import model.GameData;
-import model.UserData;
+import chess.ResponseException;
 import requestsandresults.*;
-import service.ResponseException;
-
 import java.net.*;
 import java.net.http.*;
-import java.util.Collection;
 
 public class ServerFacade {
     private final Gson gson;

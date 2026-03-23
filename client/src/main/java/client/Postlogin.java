@@ -6,7 +6,7 @@ import model.GameData;
 import requestsandresults.CreateGameRequest;
 import requestsandresults.JoinGameRequest;
 import requestsandresults.ListGamesResult;
-import service.ResponseException;
+import chess.ResponseException;
 import ui.ServerFacade;
 
 import java.util.Arrays;

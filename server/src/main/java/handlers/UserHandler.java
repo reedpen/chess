@@ -6,7 +6,7 @@ import io.javalin.http.Context;
 import requestsandresults.LoginRequest;
 import requestsandresults.RegisterRequest;
 import requestsandresults.UserResult;
-import service.ResponseException;
+import chess.ResponseException;
 import service.UserService;
 
 

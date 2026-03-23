@@ -1,6 +1,7 @@
 package service;
 
 import chess.ChessGame;
+import chess.ResponseException;
 import dataaccess.*;
 import model.AuthData;
 import model.GameData;
@@ -8,7 +9,6 @@ import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
-import requestsandresults.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
