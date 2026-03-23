@@ -130,7 +130,9 @@ public class Postlogin {
         Collection<GameData> games = server.listGames(authData).games();
         if (games != null) {
             for (GameData game : games) {
-                if (game.gameID() == gameID) return game.game();
+                if (game.gameID() == gameID) {
+                    return game.game();
+                }
             }
         }
         throw new ResponseException(400, "Error: Could not retrieve game state.");
