@@ -22,30 +22,34 @@ public class ClientMain {
         repl.run();
     }
 
-    public void run(){
+    public void run() {
         Scanner scanner = new Scanner(System.in);
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         System.out.println("♕ 240 Chess Client: " + piece);
-        var result = "";
-        while (!result.equals("quit")) {
-            String logged = (currentAuth != null)  ? "LOGGED IN" : "LOGGED OUT";
-            String inputQuery = String.format(SET_TEXT_COLOR_WHITE+"[%s] >>> ", logged);
-            System.out.print(inputQuery);
-            String line = scanner.nextLine();
-            try {
-            if (currentAuth == null) {
-                result = prelogin.eval(line, server);
-            } else {
-                result = postlogin.eval(line, server);
 
-                if (result.equals("Logged out.")) {
+        String result = "";
+        while (!result.equalsIgnoreCase("quit")) {
+            String logged = (currentAuth != null) ? "LOGGED IN" : "LOGGED OUT";
+            System.out.print(SET_TEXT_COLOR_WHITE + "[" + logged + "] >>> ");
+
+            String line = scanner.nextLine();
+
+            try {
+                if (currentAuth == null) {
+                    result = prelogin.eval(line, server);
+                } else {
+                    result = postlogin.eval(line, server);
+                }
+
+                System.out.println(SET_TEXT_COLOR_BLUE + result);
+
+                if (result != null && result.contains("Logged out")) {
                     currentAuth = null;
                     postlogin = null;
                 }
-            }
-            System.out.println(SET_TEXT_COLOR_BLUE + result);
+
             } catch (Throwable e) {
-                System.out.println(SET_TEXT_COLOR_RED + e.getMessage());
+                System.out.println(SET_TEXT_COLOR_RED + (e.getMessage() != null ? e.getMessage() : e.toString()));
             }
         }
     }
