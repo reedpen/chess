@@ -51,7 +51,7 @@ public class ServerFacade {
                 .DELETE()
                 .build();
 
-        executeRequest(request, UserData.class);
+        executeRequest(request, Void.class);
     }
 
     public ListGamesResult listGames(AuthData data) throws ResponseException {
@@ -65,29 +65,29 @@ public class ServerFacade {
     }
 
 
-    public CreateGameResult createGame(AuthData authData, GameData gameRequest) throws ResponseException {
+    public CreateGameResult createGame(AuthData authData, CreateGameRequest gameRequest) throws ResponseException {
         String jsonBody = gson.toJson(gameRequest);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + "/game"))
                 .header("authorization", authData.authToken())
-                .header("Content-Type", "application/json") // Required when sending a JSON body
+                .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
 
         return executeRequest(request, CreateGameResult.class);
     }
 
-    public void joinGame(JoinGameRequest data) throws ResponseException {
+    public void joinGame(AuthData authData, JoinGameRequest data) throws ResponseException {
         String jsonBody = gson.toJson(data);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + "/game"))
+                .header("authorization", authData.authToken()) // Added missing header
                 .header("Content-Type", "application/json")
                 .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
-
-        executeRequest(request, GameData.class);
+        executeRequest(request, Void.class);
     }
 
 

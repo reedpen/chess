@@ -18,11 +18,11 @@ public class Postlogin{
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "create" -> createGame(params);
-                case "logout" -> logout();
-                case "list" -> listGames();
+                case "create" -> createGame(server, params);
+                case "logout" -> logout(server);
+                case "list" -> listGames(server);
                 case "join" -> joinGame(server, params);
-                case "observe" -> observeGame(params);
+                case "observe" -> observeGame(server, params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -44,7 +44,7 @@ public class Postlogin{
 
     public String joinGame(ServerFacade server, String... params) throws ResponseException{
         try {
-            if (params.length >= 2) {
+            if (params.length == 2) {
                 server.joinGame(new JoinGameRequest(params[0], Integer.parseInt(params[1])));
                 return String.format("You joined game %s in as %s.", params[1], params[0]);
             }
@@ -53,16 +53,16 @@ public class Postlogin{
         }
         throw new ResponseException(401, "Expected: <color> <game name>");
     }
-    public String observeGame(String... params) throws ResponseException{
+    public String observeGame(ServerFacade server, String... params) throws ResponseException{
+        server.joinGame(new JoinGameRequest());
+    }
+    public String listGames(ServerFacade server) throws ResponseException{
+        return server.listGames()
+    }
+    public String logout(ServerFacade server) throws ResponseException{
         return toString();
     }
-    public String listGames() throws ResponseException{
-        return toString();
-    }
-    public String logout() throws ResponseException{
-        return toString();
-    }
-    public String createGame(String... params) throws ResponseException{
+    public String createGame(ServerFacade server, String... params) throws ResponseException{
         return toString();
     }
 }

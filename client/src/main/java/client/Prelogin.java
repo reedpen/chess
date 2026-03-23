@@ -1,8 +1,10 @@
 package client;
 
+import model.AuthData;
 import model.UserData;
 import requestsandresults.LoginRequest;
 import requestsandresults.RegisterRequest;
+import requestsandresults.UserResult;
 import server.Server;
 import service.ResponseException;
 import ui.ServerFacade;
@@ -11,7 +13,10 @@ import java.util.Arrays;
 
 public class Prelogin{
 
-
+    private final ClientMain client;
+    public Prelogin(ClientMain client) {
+        this.client = client;
+    }
     public String eval(String input, ServerFacade server) {
         try {
             String[] tokens = input.toLowerCase().split(" ");
@@ -31,8 +36,10 @@ public class Prelogin{
     public String login(ServerFacade server, String... params) throws ResponseException{
         try {
             if (params.length >= 2) {
-                server.login(new LoginRequest(params[0], params[1]));
-                return String.format("You signed in as %s.", params[0]);
+                UserResult result = server.login(new LoginRequest(params[0], params[1]));
+                AuthData authData = new AuthData(result.authToken(), result.username());
+                client.setAuthData(authData);
+                return String.format("You have successfully signed in as %s.", params[0]);
             }
         } catch (Exception e) {
             throw new ResponseException(401, "Incorrect password or username");
@@ -44,9 +51,10 @@ public class Prelogin{
     public String register(ServerFacade server, String... params) throws ResponseException{
         try{
             if (params.length >= 3) {
-                server.register(new RegisterRequest(params[0], params[1], params[2]));
-
-                return String.format("You are registered as %s.", params[0]);
+                UserResult result = server.register(new RegisterRequest(params[0], params[1], params[2]));
+                AuthData authData = new AuthData(result.authToken(), result.username());
+                client.setAuthData(authData);
+                return String.format("You are registered and logged in as %s.", params[0]);
             }
         } catch (Exception e) {
             throw new ResponseException(401, "Username already taken.");
