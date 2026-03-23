@@ -63,9 +63,11 @@ public class Prelogin{
 
     public String help() {
         return """
-                    - register <username> <password> <email>
-                    - login <username> <password>
-                    - quit
+                Available Commands:
+                - register <USER> <PASS> <EMAIL> : Create a new account
+                - login <USER> <PASS>            : Access your account
+                - quit                           : Exit application
+                - help                           : Show this menu
                 """;
     }
 }
