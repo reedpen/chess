@@ -3,9 +3,7 @@ package handlers;
 import com.google.gson.Gson;
 
 import io.javalin.http.Context;
-import requestsandresults.LoginRequest;
-import requestsandresults.RegisterRequest;
-import requestsandresults.UserResult;
+import requestsandresults.*;
 import chess.ResponseException;
 import service.UserService;
 
