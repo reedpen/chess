@@ -22,7 +22,8 @@ public class ClientMain {
         repl.run();
     }
 
-    public void run(Scanner scanner, ServerFacade server){
+    public void run(){
+        Scanner scanner = new Scanner(System.in);
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         System.out.println("♕ 240 Chess Client: " + piece);
         var result = "";

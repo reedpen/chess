@@ -83,7 +83,7 @@ public class ServerFacade {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + "/game"))
-                .header("authorization", authData.authToken()) // Added missing header
+                .header("authorization", authData.authToken())
                 .header("Content-Type", "application/json")
                 .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
@@ -97,6 +97,10 @@ public class ServerFacade {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                if (responseClass == Void.class) {
+                    return null;
+                }
+
                 if (response.body() == null || response.body().isEmpty()) {
                     return null;
                 }
@@ -108,5 +112,4 @@ public class ServerFacade {
             throw new ResponseException(500, "Network error: " + e.getMessage());
         }
     }
-
 }

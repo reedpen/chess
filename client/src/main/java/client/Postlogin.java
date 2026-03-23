@@ -1,15 +1,25 @@
 package client;
 
+import model.AuthData;
+import model.GameData;
+import requestsandresults.CreateGameRequest;
 import requestsandresults.JoinGameRequest;
+import requestsandresults.ListGamesResult;
 import requestsandresults.LoginRequest;
 import server.Server;
 import service.ResponseException;
 import ui.ServerFacade;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 public class Postlogin{
 
+
+    private final AuthData authData;
+    public Postlogin(AuthData authData) {
+        this.authData = authData;
+    }
 
 
     public String eval(String input, ServerFacade server) {
@@ -35,7 +45,7 @@ public class Postlogin{
         return """
                     - create <game name>
                     - list
-                    - join <gameID>
+                    - join <color> <gameID>
                     - observe <gameID>
                     - logout
                     - quit
@@ -43,26 +53,58 @@ public class Postlogin{
     }
 
     public String joinGame(ServerFacade server, String... params) throws ResponseException{
-        try {
-            if (params.length == 2) {
-                server.joinGame(new JoinGameRequest(params[0], Integer.parseInt(params[1])));
-                return String.format("You joined game %s in as %s.", params[1], params[0]);
+        if (params.length == 2) {
+            try {
+                String color = params[0].toUpperCase();
+                int gameID = Integer.parseInt(params[1]);
+
+                server.joinGame(authData, new JoinGameRequest(color, gameID));
+                return String.format("Successfully joined game %d as %s.", gameID, color);
+            } catch (NumberFormatException e) {
+                throw new ResponseException(400, "Error: gameID must be a number.");
             }
-        } catch (Exception e) {
-            throw new ResponseException(401, e.getLocalizedMessage());
         }
-        throw new ResponseException(401, "Expected: <color> <game name>");
+        throw new ResponseException(400, "Expected: join <color> <gameID>");
     }
     public String observeGame(ServerFacade server, String... params) throws ResponseException{
-        server.joinGame(new JoinGameRequest());
+        if (params.length == 1) {
+            try {
+                int gameID = Integer.parseInt(params[0]);
+
+                server.joinGame(authData, new JoinGameRequest("", gameID));
+                return String.format("Now observing game %d.", gameID);
+            } catch (NumberFormatException e) {
+                throw new ResponseException(400, "Error: gameID must be a number.");
+            }
+        }
+        throw new ResponseException(400, "Expected: observe <gameID>");
     }
     public String listGames(ServerFacade server) throws ResponseException{
-        return server.listGames()
+        ListGamesResult result =  server.listGames(authData);
+        Collection<GameData> games = result.games();
+        if (games == null || games.isEmpty()) {
+            return "No active games.";
+        }
+        StringBuilder sb = new StringBuilder("Active Games:\n");
+        for (GameData game : games) {
+            sb.append(String.format("ID: %d | Name: %s | White: %s | Black: %s\n",
+                    game.gameID(),
+                    game.gameName(),
+                    game.whiteUsername() == null ? "Empty" : game.whiteUsername(),
+                    game.blackUsername() == null ? "Empty" : game.blackUsername()));
+        }
+        return sb.toString();
     }
     public String logout(ServerFacade server) throws ResponseException{
-        return toString();
+        server.logout(authData);
+        return "Logged out.";
     }
     public String createGame(ServerFacade server, String... params) throws ResponseException{
-        return toString();
+        if (params.length == 1) {
+            String gameName = params[0];
+            server.createGame(authData, new CreateGameRequest(gameName));
+            return String.format("Game '%s' created.", gameName);
+        }
+        throw new ResponseException(400, "Expected: create <game name>");
     }
 }
