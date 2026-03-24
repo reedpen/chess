@@ -147,39 +147,6 @@ public class Postlogin {
     }
 
 
-    private int parseGameID(String idStr) throws ResponseException {
-        try {
-            return Integer.parseInt(idStr);
-        } catch (NumberFormatException e) {
-            throw new ResponseException(400, "'" + idStr + "' is not a valid number. Please use a numeric Game ID.");
-        }
-    }
-
-    private ChessGame findGame(ServerFacade server, int gameID) throws ResponseException {
-        Collection<GameData> games = server.listGames(authData).games();
-        if (games == null) {
-            throw new ResponseException(500, "Failed to retrieve game list from server.");
-        }
-
-        return games.stream()
-                .filter(g -> g.gameID() == gameID)
-                .map(GameData::game)
-                .findFirst()
-                .orElseThrow(() -> new ResponseException(400, "Game ID " + gameID + " no longer exists."));
-    }
-    private GameData validateAndGetGame(ServerFacade server, int gameID) throws ResponseException {
-        Collection<GameData> games = server.listGames(authData).games();
-
-        if (games == null || games.isEmpty()) {
-            throw new ResponseException(400, "No active games found. Use 'create' to start a new game first.");
-        }
-
-        return games.stream()
-                .filter(g -> g.gameID() == gameID)
-                .findFirst()
-                .orElseThrow(() -> new ResponseException(400,
-                        String.format("Game ID %d not found. Type 'list' to see all available games.", gameID)));
-    }
     private String formatUser(String user) {
         return (user == null || user.isBlank()) ? "---" : user;
     }
