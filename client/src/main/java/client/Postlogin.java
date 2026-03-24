@@ -97,10 +97,6 @@ public class Postlogin {
         }
 
         GameData gameData = getGameFromCache(params[0]);
-        int actualGameID = gameData.gameID();
-
-        server.joinGame(authData, new JoinGameRequest(null, actualGameID));
-
         printWhiteBoard(gameData.game().getBoard());
 
         return String.format("Now observing game: %s (Index: %s)", gameData.gameName(), params[0]);
@@ -191,7 +187,7 @@ public class Postlogin {
     private GameData getGameFromCache(String indexStr) throws ResponseException {
         int index;
         try {
-            index = Integer.parseInt(indexStr) - 1; // Convert 1-based back to 0-based
+            index = Integer.parseInt(indexStr) - 1;
         } catch (NumberFormatException e) {
             throw new ResponseException(400, "Error: Please provide a valid list number (e.g., 1).");
         }

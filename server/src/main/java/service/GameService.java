@@ -10,6 +10,8 @@ import requestsandresults.*;
 import model.AuthData;
 import model.GameData;
 
+import java.util.HashSet;
+
 
 public class GameService {
     private final AuthDAO authDAO;
@@ -53,9 +55,11 @@ public class GameService {
     }
 
     public void joinGame(String authToken, JoinGameRequest request) throws ResponseException {
+        // 1. Basic Null Checks
         if (request == null || authToken == null) {
             throw new ResponseException(400, "Error: bad request");
         }
+
         try {
             AuthData authData = authDAO.getAuth(authToken);
             if (authData == null) {
@@ -68,28 +72,31 @@ public class GameService {
             }
 
             String color = request.playerColor();
+
             if (color == null || color.isEmpty()) {
-                return;
+                throw new ResponseException(400, "Error: bad request");
+            }
+            if (!color.equals("WHITE") && !color.equals("BLACK")) {
+                throw new ResponseException(400, "Error: bad request");
             }
 
-            GameData newData;
             String username = authData.username();
+            GameData newData;
 
             if ("WHITE".equals(color)) {
                 if (oldData.whiteUsername() != null) {
                     throw new ResponseException(403, "Error: already taken");
                 }
                 newData = new GameData(oldData.gameID(), username, oldData.blackUsername(), oldData.gameName(), oldData.game());
-            } else if ("BLACK".equals(color)) {
+            } else {
                 if (oldData.blackUsername() != null) {
                     throw new ResponseException(403, "Error: already taken");
                 }
                 newData = new GameData(oldData.gameID(), oldData.whiteUsername(), username, oldData.gameName(), oldData.game());
-            } else {
-                throw new ResponseException(400, "Error: bad request");
             }
 
             gameDAO.updateGame(newData);
+
         } catch (DataAccessException e) {
             throw new ResponseException(500, "Error: " + e.getMessage());
         }
