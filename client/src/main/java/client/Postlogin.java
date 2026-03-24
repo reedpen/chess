@@ -9,6 +9,7 @@ import ui.ServerFacade;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import static ui.Board.printBlackBoard;
 import static ui.Board.printWhiteBoard;
@@ -17,7 +18,7 @@ import static ui.EscapeSequences.*;
 public class Postlogin {
 
     private final AuthData authData;
-
+    private List<GameData> gameCache = new java.util.ArrayList<>();
     public Postlogin(AuthData authData) {
         this.authData = authData;
     }
@@ -70,19 +71,16 @@ public class Postlogin {
 
     public String joinGame(ServerFacade server, String... params) throws ResponseException {
         if (params.length != 2) {
-            throw new ResponseException(400, "Invalid arguments. Usage: join <WHITE|BLACK> <ID>");
+            throw new ResponseException(400, "Invalid arguments. Usage: join <WHITE|BLACK> <LIST_INDEX>");
         }
 
         String colorInput = params[0].toUpperCase();
         if (!colorInput.equals("WHITE") && !colorInput.equals("BLACK")) {
             throw new ResponseException(400, "Invalid color: " + colorInput + ". Must be 'WHITE' or 'BLACK'.");
         }
-
-        int gameID = parseGameID(params[1]);
-
-        GameData gameData = validateAndGetGame(server, gameID);
-
-        server.joinGame(authData, new JoinGameRequest(colorInput, gameID));
+        GameData gameData = getGameFromCache(params[1]);
+        int actualGameID = gameData.gameID();
+        server.joinGame(authData, new JoinGameRequest(colorInput, actualGameID));
 
         if (colorInput.equals("WHITE")) {
             printWhiteBoard(gameData.game().getBoard());
@@ -90,34 +88,41 @@ public class Postlogin {
             printBlackBoard(gameData.game().getBoard());
         }
 
-        return String.format("Successfully joined game %d as %s.", gameID, colorInput);
+        return String.format("Successfully joined game '%s' as %s.", gameData.gameName(), colorInput);
     }
 
     public String observeGame(ServerFacade server, String... params) throws ResponseException {
         if (params.length != 1) {
-            throw new ResponseException(400, "Invalid arguments. Usage: observe <ID>");
+            throw new ResponseException(400, "Invalid arguments. Usage: observe <LIST_INDEX>");
         }
 
-        int gameID = parseGameID(params[0]);
+        GameData gameData = getGameFromCache(params[0]);
+        int actualGameID = gameData.gameID();
 
-        GameData gameData = validateAndGetGame(server, gameID);
-
-        server.joinGame(authData, new JoinGameRequest(null, gameID));
+        server.joinGame(authData, new JoinGameRequest(null, actualGameID));
 
         printWhiteBoard(gameData.game().getBoard());
-        return "Now observing game: " + gameData.gameName();
+
+        return String.format("Now observing game: %s (Index: %s)", gameData.gameName(), params[0]);
     }
 
     public String listGames(ServerFacade server) throws ResponseException {
         Collection<GameData> games = server.listGames(authData).games();
+        gameCache.clear();
+
         if (games == null || games.isEmpty()) {
             return "No active games found on server.";
         }
 
+        gameCache.addAll(games);
+
         StringBuilder sb = new StringBuilder("--- Active Games ---\n");
-        for (GameData game : games) {
+        for (int i = 0; i < gameCache.size(); i++) {
+            GameData game = gameCache.get(i);
+            int displayIndex = i + 1;
+
             sb.append(String.format("[%d] %-15s | White: %-10s | Black: %-10s\n",
-                    game.gameID(),
+                    displayIndex,
                     game.gameName(),
                     formatUser(game.whiteUsername()),
                     formatUser(game.blackUsername())));
@@ -181,5 +186,20 @@ public class Postlogin {
     }
     private String formatUser(String user) {
         return (user == null || user.isBlank()) ? "---" : user;
+    }
+
+    private GameData getGameFromCache(String indexStr) throws ResponseException {
+        int index;
+        try {
+            index = Integer.parseInt(indexStr) - 1; // Convert 1-based back to 0-based
+        } catch (NumberFormatException e) {
+            throw new ResponseException(400, "Error: Please provide a valid list number (e.g., 1).");
+        }
+
+        if (index < 0 || index >= gameCache.size()) {
+            throw new ResponseException(400, "Error: No game found at index " + (index + 1) + ". Run 'list' to see current options.");
+        }
+
+        return gameCache.get(index);
     }
 }
