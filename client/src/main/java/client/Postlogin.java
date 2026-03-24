@@ -80,16 +80,17 @@ public class Postlogin {
 
         int gameID = parseGameID(params[1]);
 
+        GameData gameData = validateAndGetGame(server, gameID);
+
         server.joinGame(authData, new JoinGameRequest(colorInput, gameID));
-        ChessGame targetGame = findGame(server, gameID);
 
         if (colorInput.equals("WHITE")) {
-            printWhiteBoard(targetGame.getBoard());
+            printWhiteBoard(gameData.game().getBoard());
         } else {
-            printBlackBoard(targetGame.getBoard());
+            printBlackBoard(gameData.game().getBoard());
         }
 
-        return String.format("Joined game %d as %s.", gameID, colorInput);
+        return String.format("Successfully joined game %d as %s.", gameID, colorInput);
     }
 
     public String observeGame(ServerFacade server, String... params) throws ResponseException {
@@ -99,11 +100,12 @@ public class Postlogin {
 
         int gameID = parseGameID(params[0]);
 
-        server.joinGame(authData, new JoinGameRequest(null, gameID));
-        ChessGame targetGame = findGame(server, gameID);
+        GameData gameData = validateAndGetGame(server, gameID);
 
-        printWhiteBoard(targetGame.getBoard());
-        return "Observing game " + gameID + ".";
+        server.joinGame(authData, new JoinGameRequest(null, gameID));
+
+        printWhiteBoard(gameData.game().getBoard());
+        return "Now observing game: " + gameData.gameName();
     }
 
     public String listGames(ServerFacade server) throws ResponseException {
@@ -164,7 +166,19 @@ public class Postlogin {
                 .findFirst()
                 .orElseThrow(() -> new ResponseException(400, "Game ID " + gameID + " no longer exists."));
     }
+    private GameData validateAndGetGame(ServerFacade server, int gameID) throws ResponseException {
+        Collection<GameData> games = server.listGames(authData).games();
 
+        if (games == null || games.isEmpty()) {
+            throw new ResponseException(400, "No active games found. Use 'create' to start a new game first.");
+        }
+
+        return games.stream()
+                .filter(g -> g.gameID() == gameID)
+                .findFirst()
+                .orElseThrow(() -> new ResponseException(400,
+                        String.format("Game ID %d not found. Type 'list' to see all available games.", gameID)));
+    }
     private String formatUser(String user) {
         return (user == null || user.isBlank()) ? "---" : user;
     }
