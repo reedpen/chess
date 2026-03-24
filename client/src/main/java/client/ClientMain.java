@@ -29,8 +29,10 @@ public class ClientMain {
 
         String result = "";
         while (!result.equalsIgnoreCase("quit")) {
+            String statusColor = (currentAuth != null) ? SET_TEXT_COLOR_GREEN : SET_TEXT_COLOR_RED;
             String logged = (currentAuth != null) ? "LOGGED IN" : "LOGGED OUT";
-            System.out.print(SET_TEXT_COLOR_WHITE + "[" + logged + "] >>> ");
+
+            System.out.print(statusColor + "[" + logged + "] " + SET_TEXT_COLOR_WHITE + ">>> " + RESET_TEXT_COLOR);
 
             String line = scanner.nextLine();
 
@@ -40,8 +42,9 @@ public class ClientMain {
                 } else {
                     result = postlogin.eval(line, server);
                 }
-
-                System.out.println(SET_TEXT_COLOR_BLUE + result);
+                String msgColor = (result.contains("Successfully") || result.contains("created"))
+                        ? SET_TEXT_COLOR_GREEN : SET_TEXT_COLOR_BLUE;
+                System.out.println(msgColor + result + RESET_TEXT_COLOR);
 
                 if (result != null && result.contains("Logged out")) {
                     currentAuth = null;

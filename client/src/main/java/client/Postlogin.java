@@ -12,6 +12,7 @@ import java.util.Collection;
 
 import static ui.Board.printBlackBoard;
 import static ui.Board.printWhiteBoard;
+import static ui.EscapeSequences.*;
 
 public class Postlogin {
 
@@ -47,16 +48,24 @@ public class Postlogin {
     }
 
     public String help() {
-        return """
-                Available Commands:
-                - create <NAME>         : Start a new game
-                - list                  : List all current games
-                - join <COLOR> <ID>     : Join as WHITE or BLACK
-                - observe <ID>          : Watch a game
-                - logout                : Return to start
-                - quit                  : Exit application
-                - help                  : Show this menu
-                """;
+        return String.format("""
+            %s--- COMMANDS ---%s
+            %screate <NAME>%s         - start a new game
+            %slist%s                  - list all current games
+            %sjoin <COLOR> <ID>%s     - join as WHITE or BLACK
+            %sobserve <ID>%s          - watch a game
+            %slogout%s                - return to start
+            %squit%s                  - exit application
+            %shelp%s                  - show this menu
+            """,
+                SET_TEXT_BOLD + SET_TEXT_COLOR_MAGENTA, RESET_TEXT_BOLD_FAINT,
+                SET_TEXT_COLOR_WHITE, RESET_TEXT_COLOR,
+                SET_TEXT_COLOR_WHITE, RESET_TEXT_COLOR,
+                SET_TEXT_COLOR_WHITE, RESET_TEXT_COLOR,
+                SET_TEXT_COLOR_WHITE, RESET_TEXT_COLOR,
+                SET_TEXT_COLOR_WHITE, RESET_TEXT_COLOR,
+                SET_TEXT_COLOR_WHITE, RESET_TEXT_COLOR,
+                SET_TEXT_COLOR_WHITE, RESET_TEXT_COLOR);
     }
 
     public String joinGame(ServerFacade server, String... params) throws ResponseException {
