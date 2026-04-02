@@ -1,5 +1,6 @@
 package client;
 
+import com.google.gson.Gson;
 import model.AuthData;
 import requestsandresults.LoginRequest;
 import requestsandresults.RegisterRequest;
@@ -14,6 +15,7 @@ import static ui.EscapeSequences.*;
 public class Prelogin{
 
     private final ClientMain client;
+    private final Gson gson = new Gson();
     public Prelogin(ClientMain client) {
         this.client = client;
     }
@@ -29,7 +31,9 @@ public class Prelogin{
                 default -> help();
             };
         } catch (ResponseException ex) {
-            return ex.getMessage();
+            String message = ex.getMessage().substring(ex.getMessage().indexOf(":\":\"")-1);
+            String newMessage = message.substring(0, message.indexOf("\"")-1);
+            return newMessage;
         }
     }
 
@@ -49,7 +53,6 @@ public class Prelogin{
 
 
     public String register(ServerFacade server, String... params) throws ResponseException {
-        // 1. Guard against wrong number of arguments
         if (params.length < 3) {
             throw new ResponseException(400, "Expected: register <username> <password> <email>");
         }
@@ -62,7 +65,6 @@ public class Prelogin{
         // If it fails, the Facade throws a ResponseException with the REAL message.
         UserResult result = server.register(new RegisterRequest(username, password, email));
 
-        // 3. If we get here, it was successful.
         AuthData authData = new AuthData(result.authToken(), result.username());
         client.setAuthData(authData);
 
@@ -71,13 +73,13 @@ public class Prelogin{
 
     public String help() {
         return String.format("""
-            %s--- COMMANDS ---%s
+            %s~~~ COMMANDS ~~~%s
             %sregister <U> <P> <E>%s - create an account
             login <U> <P>        - sign in
             quit                 - exit
             help                 - show this menu
             """,
-                SET_TEXT_BOLD + SET_TEXT_COLOR_MAGENTA, RESET_TEXT_BOLD_FAINT,
+                SET_TEXT_BOLD + SET_TEXT_COLOR_YELLOW, RESET_TEXT_BOLD_FAINT,
                 SET_TEXT_COLOR_WHITE, RESET_TEXT_COLOR
                 );
     }

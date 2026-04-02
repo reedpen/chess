@@ -44,7 +44,9 @@ public class Postlogin {
                 default -> "Unknown command: " + cmd + "\n" + help();
             };
         } catch (ResponseException ex) {
-            return "Error: " + ex.getMessage();
+            String message = ex.getMessage().substring(ex.getMessage().indexOf(":\":\"")-1);
+            String newMessage = message.substring(0, message.indexOf("\""));
+            return newMessage;
         }
     }
 

@@ -48,17 +48,17 @@ public class ServerFacadeTests {
 
     @Test
     public void registerPositive() throws Exception {
-        RegisterRequest req = new RegisterRequest("player1", "password", "p1@email.com");
+        RegisterRequest req = new RegisterRequest("reed", "123", "reed@email.com");
         UserResult authData = facade.register(req);
 
         assertNotNull(authData.authToken());
         assertTrue(authData.authToken().length() > 10);
-        assertEquals("player1", authData.username());
+        assertEquals("reed", authData.username());
     }
 
     @Test
     public void registerNegativeDuplicate() throws Exception {
-        RegisterRequest req = new RegisterRequest("player1", "password", "p1@email.com");
+        RegisterRequest req = new RegisterRequest("reed", "123", "reed@email.com");
         facade.register(req); // First registration succeeds
 
         assertThrows(ResponseException.class, () -> facade.register(req));
@@ -67,27 +67,27 @@ public class ServerFacadeTests {
 
     @Test
     public void loginPositive() throws Exception {
-        facade.register(new RegisterRequest("player1", "password", "p1@email.com"));
+        facade.register(new RegisterRequest("reed", "pword", "reed@email.com"));
 
-        LoginRequest req = new LoginRequest("player1", "password");
+        LoginRequest req = new LoginRequest("reed", "pword");
         UserResult authData = facade.login(req);
 
         assertNotNull(authData.authToken());
-        assertEquals("player1", authData.username());
+        assertEquals("reed", authData.username());
     }
 
     @Test
     public void loginNegativeBadPassword() throws Exception {
-        facade.register(new RegisterRequest("player1", "password", "p1@email.com"));
+        facade.register(new RegisterRequest("reed", "pword", "reed@email.com"));
 
-        LoginRequest req = new LoginRequest("player1", "wrongpassword");
+        LoginRequest req = new LoginRequest("reed", "wrongpword");
         assertThrows(ResponseException.class, () -> facade.login(req));
     }
 
 
     @Test
     public void logoutPositive() throws Exception {
-        UserResult result = facade.register(new RegisterRequest("player1", "password", "p1@email.com"));
+        UserResult result = facade.register(new RegisterRequest("reed", "pword", "reed@email.com"));
         AuthData authData = new AuthData(result.authToken(), result.username());
 
         assertDoesNotThrow(() -> facade.logout(authData));
@@ -104,7 +104,7 @@ public class ServerFacadeTests {
 
     @Test
     public void createGamePositive() throws Exception {
-        UserResult result = facade.register(new RegisterRequest("player1", "password", "p1@email.com"));
+        UserResult result = facade.register(new RegisterRequest("reed", "pword", "reed@email.com"));
         AuthData authData = new AuthData(result.authToken(), result.username());
 
         CreateGameResult gameResult = facade.createGame(authData, new CreateGameRequest("MyGame"));
@@ -120,7 +120,7 @@ public class ServerFacadeTests {
 
     @Test
     public void listGamesPositive() throws Exception {
-        UserResult result = facade.register(new RegisterRequest("player1", "password", "p1@email.com"));
+        UserResult result = facade.register(new RegisterRequest("reed", "pword", "reed@email.com"));
         AuthData authData = new AuthData(result.authToken(), result.username());
 
         facade.createGame(authData, new CreateGameRequest("Game1"));
@@ -140,7 +140,7 @@ public class ServerFacadeTests {
 
     @Test
     public void joinGamePositive() throws Exception {
-        UserResult result = facade.register(new RegisterRequest("player1", "password", "p1@email.com"));
+        UserResult result = facade.register(new RegisterRequest("reed", "pword", "reed@email.com"));
         AuthData authData = new AuthData(result.authToken(), result.username());
 
         CreateGameResult gameResult = facade.createGame(authData, new CreateGameRequest("MyGame"));
@@ -151,7 +151,7 @@ public class ServerFacadeTests {
 
     @Test
     public void joinGameNegativeInvalidId() throws Exception {
-        UserResult result = facade.register(new RegisterRequest("player1", "password", "p1@email.com"));
+        UserResult result = facade.register(new RegisterRequest("reed", "pword", "reed@email.com"));
         AuthData authData = new AuthData(result.authToken(), result.username());
 
         JoinGameRequest joinReq = new JoinGameRequest("WHITE", 9999);
