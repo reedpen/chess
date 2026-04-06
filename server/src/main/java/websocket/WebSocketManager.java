@@ -3,6 +3,7 @@ package websocket;
 import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPiece;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
@@ -88,7 +89,7 @@ public class WebSocketManager implements WsConnectHandler, WsMessageHandler, WsC
 
         try {
             AuthData authData = authDAO.getAuth(token);
-            GameData gameData = gameDAO.getGame(command.getGameID());
+            GameData gameData = gameDAO.getGame(gameId);
             if (authData == null) {
                 sendErrorMessage(session, "Error: Unauthorized");
                 return;
@@ -98,35 +99,68 @@ public class WebSocketManager implements WsConnectHandler, WsMessageHandler, WsC
                 return;
             }
 
+            LoadGameMessage loadMessage = new LoadGameMessage(gameData.game());
+            String jsonLoadMessage = new Gson().toJson(loadMessage);
+            session.getRemote().sendString(jsonLoadMessage);
+
             String role = "an observer";
             if (username.equals(gameData.whiteUsername())) {
                 role = "White";
             } else if (username.equals(gameData.blackUsername())) {
                 role = "Black";
             }
-            LoadGameMessage loadMessage = new LoadGameMessage(gameData.game());
-            String jsonLoadMessage = new Gson().toJson(loadMessage);
-            session.getRemote().sendString(jsonLoadMessage);
             String message = String.format("%s joined the game as %s.", username, role);
+
             NotificationMessage notification = new NotificationMessage(message);
             connections.broadcast(gameId, session, notification);
+
         } catch (DataAccessException e) {sendErrorMessage(session, "Error: Database error - " + e.getMessage());}
     }
 
-    private void makeMove(Session session, String username, MakeMoveCommand command) {
+    private void makeMove(Session session, String username, MakeMoveCommand command) throws IOException{
         int gameId = command.getGameID();
         ChessMove move = command.getMove();
-        ChessGame.TeamColor color = command.get
         try {
             GameData game = gameDAO.getGame(gameId);
+            ChessGame.TeamColor color = game.game().getTeamTurn();
+            // check for correct turn order
+            if ((username.equals(game.whiteUsername()) && color == ChessGame.TeamColor.WHITE) ||
+                    (username.equals(game.blackUsername()) && color == ChessGame.TeamColor.BLACK)) {
+                try {
+                    game.game().makeMove(move);
 
-            String message = String.format("%s moved %s to location %s.", username, role);
-            NotificationMessage notification = new NotificationMessage(message);
-            connections.broadcast(gameId, session, notification);
+                } catch (InvalidMoveException e) {
+                    sendErrorMessage(session, "Error: Invalid move" + e.getMessage());return;
+                }
+                gameDAO.updateGame(game);
+                // update all sessions with new board
+                LoadGameMessage loadMessage = new LoadGameMessage(game.game());
+                String jsonLoadMessage = new Gson().toJson(loadMessage);
+                for (Session s : connections.connections.get(gameId)) {
+                    if (s.isOpen()) {
+                        s.getRemote().sendString(jsonLoadMessage);
+                    }
+                }
+                String message = String.format("%s moved from %s to %s.", username, move.getStartPosition(), move.getEndPosition());
+                NotificationMessage notification = new NotificationMessage(message);
+                connections.broadcast(gameId, session, notification);
+
+                // check game end conditions
+                ChessGame.TeamColor opposingColor = (color == ChessGame.TeamColor.WHITE) ?
+                        ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+
+                if (game.game().isInCheckmate(opposingColor)) {
+                    connections.broadcast(gameId, null, new NotificationMessage(opposingColor.toString() + " is in checkmate."));
+                } else if (game.game().isInCheck(opposingColor)) {
+                    connections.broadcast(gameId, null, new NotificationMessage(opposingColor.toString() + " is in check."));
+                } else if (game.game().isInStalemate(opposingColor)) {
+                    connections.broadcast(gameId, null, new NotificationMessage("Game has reached a stalemate."));
+                }
+            }
+
         } catch (DataAccessException e){
             sendErrorMessage(session, "Error: Database error - " + e.getMessage());
         }
-
 
     }
 
