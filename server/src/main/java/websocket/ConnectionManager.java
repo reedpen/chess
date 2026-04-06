@@ -29,12 +29,12 @@ public class ConnectionManager {
         }
     }
 
-    public void broadcast(int gameId, Session excludeSession, Notification notification) throws IOException {
+    public void broadcast(int gameId, Session excludeSession, String message) throws IOException {
 
-        Set<Session> = connections.get(gameId);
+        Set<Session> sessions = connections.get(gameId);
 
         if (sessions != null) {
-            String msg = new Gson().toJson(notification);
+            String msg = new Gson().toJson(message);
         }
         String msg = notification.toString();
         for (Session session : sessions) {
