@@ -1,27 +1,43 @@
 package websocket;
 
-import chess.ResponseException;
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
 import com.google.gson.Gson;
-import exception.ResponseException;
-import io.javalin.http.UnauthorizedResponse;
+import dataaccess.AuthDAO;
+import dataaccess.DataAccessException;
+import dataaccess.GameDAO;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
 import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
+import model.AuthData;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
-import webSocketMessages.Action;
-import webSocketMessages.Notification;
+
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ErrorMessage;
 
+
+import javax.xml.crypto.Data;
 import java.io.IOException;
 
-public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
-
+public class WebSocketManager implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
+    private final AuthDAO authDAO;
+    private final GameDAO gameDAO;
     private final ConnectionManager connections = new ConnectionManager();
     private final Gson gson = new Gson();
+
+    public WebSocketManager(AuthDAO authDAO, GameDAO gameDAO) {
+        this.authDAO = authDAO;
+        this.gameDAO = gameDAO;
+    }
+
     @Override
     public void handleConnect(WsConnectContext ctx) {
         System.out.println("Websocket connected");
@@ -29,56 +45,109 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     @Override
-    public void handleMessage(WsMessageContext ctx) throws Exception { //adapt this function, from ws video, deserialize twice for move commands
-        int gameId = -1;
-        Session session = wsMessageContext.session;
-
-        try {
-            UserGameCommand command = gson.fromJson(wsMessageContext.message(), UserGameCommand.class);
-            gameId = command.getGameID();
-            String username = getUsername(command.getAuthString());
-            connections.saveSession(gameID, session);
-
-            switch (command.getCommandType()) {
-                case CONNECT -> connect(session, username, (ConnectCommand) command);
-                case MAKE_MOVE -> makeMove(session, username, (MakeMoveCommand) command);
-                case LEAVE -> leaveGame(session, username, (LeaveGameCommand) command);
-                case RESIGN -> resign(session, username, (ResignCommand) command);
-            }
-        } catch (UnauthorizedResponse ex) {
-            sendMessage(session, gameId, new Exception("Error: unauthorized"));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            sendMessage(session, gameID, new Exception("Error: " + ex.getMessage()));
-        }
-    }
-
-    @Override
     public void handleClose(WsCloseContext ctx) {
         System.out.println("Websocket closed");
     }
 
-    private void enter(String visitorName, Session session) throws IOException {
-        connections.add(session);
-        var message = String.format("%s is in the shop", visitorName);
-        var notification = new Notification(Notification.Type.ARRIVAL, message);
-        connections.broadcast(session, notification);
-    }
+    @Override
+    public void handleMessage(WsMessageContext ctx) throws Exception {
+        Session session = ctx.session;
+        String rawMessage = ctx.message();
 
-    private void exit(String visitorName, Session session) throws IOException {
-        var message = String.format("%s left the shop", visitorName);
-        var notification = new Notification(Notification.Type.DEPARTURE, message);
-        connections.broadcast(session, notification);
-        connections.remove(session);
-    }
-
-    public void makeNoise(String petName, String sound) throws ResponseException {
         try {
-            var message = String.format("%s says %s", petName, sound);
-            var notification = new Notification(Notification.Type.NOISE, message);
-            connections.broadcast(null, notification);
+            UserGameCommand baseCommand = gson.fromJson(rawMessage, UserGameCommand.class);
+
+            // TODO: Validate auth token here using your UserService/AuthDAO.
+            // String username = getUsername(baseCommand.getAuthToken());
+            String username = "temp";
+
+            connections.saveSession(baseCommand.getGameID(), session);
+
+            switch (baseCommand.getCommandType()) {
+                case CONNECT -> {connect(session, username, baseCommand);}
+                case MAKE_MOVE -> {
+                    // deserialize TWICE
+                    MakeMoveCommand moveCommand = gson.fromJson(rawMessage, MakeMoveCommand.class);
+                    makeMove(session, username, moveCommand);
+                }
+                case LEAVE -> leaveGame(session, username, baseCommand);
+                case RESIGN -> resign(session, username, baseCommand);
+            }
+
         } catch (Exception ex) {
-            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+            ex.printStackTrace();
+            sendErrorMessage(session, "Error: " + ex.getMessage());
+        }
+    }
+
+    // actions
+
+    private void connect(Session session, String username, UserGameCommand command) throws IOException {
+        int gameId = command.getGameID();
+        String token = command.getAuthToken();
+
+        try {
+            AuthData authData = authDAO.getAuth(token);
+            GameData gameData = gameDAO.getGame(command.getGameID());
+            if (authData == null) {
+                sendErrorMessage(session, "Error: Unauthorized");
+                return;
+            }
+            if (gameData == null) {
+                sendErrorMessage(session, "Error: Game does not exist.");
+                return;
+            }
+
+            String role = "an observer";
+            if (username.equals(gameData.whiteUsername())) {
+                role = "White";
+            } else if (username.equals(gameData.blackUsername())) {
+                role = "Black";
+            }
+            LoadGameMessage loadMessage = new LoadGameMessage(gameData.game());
+            String jsonLoadMessage = new Gson().toJson(loadMessage);
+            session.getRemote().sendString(jsonLoadMessage);
+            String message = String.format("%s joined the game as %s.", username, role);
+            NotificationMessage notification = new NotificationMessage(message);
+            connections.broadcast(gameId, session, notification);
+        } catch (DataAccessException e) {sendErrorMessage(session, "Error: Database error - " + e.getMessage());}
+    }
+
+    private void makeMove(Session session, String username, MakeMoveCommand command) {
+        int gameId = command.getGameID();
+        ChessMove move = command.getMove();
+        ChessGame.TeamColor color = command.get
+        try {
+            GameData game = gameDAO.getGame(gameId);
+
+            String message = String.format("%s moved %s to location %s.", username, role);
+            NotificationMessage notification = new NotificationMessage(message);
+            connections.broadcast(gameId, session, notification);
+        } catch (DataAccessException e){
+            sendErrorMessage(session, "Error: Database error - " + e.getMessage());
+        }
+
+
+    }
+
+    private void leaveGame(Session session, String username, UserGameCommand command) {
+lea
+
+        connections.remove(command.getGameID(), session);
+    }
+
+    private void resign(Session session, String username, UserGameCommand command) {
+
+    }
+
+    // helpers
+
+    private void sendErrorMessage(Session session, String errorMessage) {
+        try {
+            ErrorMessage error = new ErrorMessage(errorMessage);
+            session.getRemote().sendString(gson.toJson(error));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
