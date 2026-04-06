@@ -59,6 +59,4 @@ public class UserGameCommand {
         return Objects.hash(getCommandType(), getAuthToken(), getGameID());
     }
 
-
-    21
 }

@@ -164,10 +164,35 @@ public class WebSocketManager implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
-    private void leaveGame(Session session, String username, UserGameCommand command) {
-lea
+    private void leaveGame(Session session, String username, UserGameCommand command) throws IOException{
+        int gameId = command.getGameID();
+        try {
 
-        connections.remove(command.getGameID(), session);
+
+            GameData game = gameDAO.getGame(gameId);
+            if (game == null) {
+                sendErrorMessage(session, "Error: Game does not exist.");
+                return;
+            }
+
+
+            String whitePlayer = game.whiteUsername() ;
+            String blackPlayer = game.blackUsername();
+
+            if (username.equals(whitePlayer)) {
+                whitePlayer = null;
+            } else if (username.equals(blackPlayer)) {
+                blackPlayer = null;
+            }
+
+            gameDAO.updateGame(new GameData(gameId, whitePlayer, blackPlayer, game.gameName(), game.game()));
+            connections.remove(command.getGameID(), session);
+            String message = String.format("%s left the game.", username);
+            NotificationMessage notification = new NotificationMessage(message);
+            connections.broadcast(gameId, session, notification);
+        } catch (DataAccessException e) {
+            sendErrorMessage(session, "Error: Database error - " + e.getMessage());
+        }
     }
 
     private void resign(Session session, String username, UserGameCommand command) {

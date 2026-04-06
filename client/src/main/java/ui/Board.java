@@ -52,7 +52,6 @@ public class Board {
         int colStep  = white ? 1 : -1;
 
         for (int row = startRow; row != endRow; row += rowStep) {
-            // Left row number
             System.out.print(BORDER_COLOR + EMPTY + row + EMPTY);
 
             for (int col = startCol; col != endCol; col += colStep) {
@@ -66,7 +65,6 @@ public class Board {
                 System.out.print(bgColor + pieceStr);
             }
 
-            // Right row number and reset background for the newline
             System.out.println(BORDER_COLOR + EMPTY + row + EMPTY + RESET_BG_COLOR + RESET_TEXT_COLOR);
         }
     }

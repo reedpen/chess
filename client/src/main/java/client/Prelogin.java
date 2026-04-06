@@ -61,8 +61,6 @@ public class Prelogin{
         String password = params[1];
         String email = params[2];
 
-        // 2. Just call the server.
-        // If it fails, the Facade throws a ResponseException with the REAL message.
         UserResult result = server.register(new RegisterRequest(username, password, email));
 
         AuthData authData = new AuthData(result.authToken(), result.username());

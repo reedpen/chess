@@ -15,6 +15,7 @@ import java.util.concurrent.ScheduledExecutorService;
 public class ChessGame {
     TeamColor currentTeam;
     ChessBoard board;
+    private boolean isOver = false;
 
     public ChessGame() {
         this.board = new ChessBoard();
@@ -262,6 +263,14 @@ public class ChessGame {
                 "currentTeam=" + currentTeam +
                 ", board=" + board +
                 '}';
+    }
+
+    public void setGameOver(boolean status) {
+        this.isGameOver = status;
+    }
+
+    public boolean isGameOver() {
+        return this.isGameOver;
     }
 
 }
