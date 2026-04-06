@@ -3,8 +3,6 @@ package chess;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -90,6 +88,8 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+
+
         if (board.getPiece(move.startPos) == null) {
             throw new InvalidMoveException("Invalid Move");
         }
@@ -109,6 +109,10 @@ public class ChessGame {
                 board.addPiece(move.endPos, piece);
                 board.addPiece(move.startPos, null);
                 changeTeam();
+
+                if (isInCheck(currentTeam) || isInStalemate(currentTeam)) {
+                    setGameOver(true);
+                }
             }
         } else {
             throw new InvalidMoveException("Invalid Move");

@@ -122,6 +122,10 @@ public class WebSocketManager implements WsConnectHandler, WsMessageHandler, WsC
         ChessMove move = command.getMove();
         try {
             GameData game = gameDAO.getGame(gameId);
+            if (game.game().isGameOver()) {
+                sendErrorMessage(session, "Error: The game is already over.");
+                return;
+            }
             ChessGame.TeamColor color = game.game().getTeamTurn();
             // check for correct turn order
             if ((username.equals(game.whiteUsername()) && color == ChessGame.TeamColor.WHITE) ||
