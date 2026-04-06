@@ -13,7 +13,7 @@ import java.util.Objects;
 public class ChessGame {
     TeamColor currentTeam;
     ChessBoard board;
-    private boolean isOver = false;
+    private boolean isGameOver = false;
 
     public ChessGame() {
         this.board = new ChessBoard();

@@ -199,8 +199,35 @@ public class WebSocketManager implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void resign(Session session, String username, UserGameCommand command) {
+    private void resign(Session session, String username, UserGameCommand command) throws IOException {
+        int gameId = command.getGameID();
 
+        try {
+            GameData game = gameDAO.getGame(gameId);
+            if (gameData == null) {
+                sendErrorMessage(session, "Error: Game does not exist.");
+                return;
+            }
+            boolean isPlayer = username.equals(game.whiteUsername()) || username.equals(game.blackUsername());
+            if (!isPlayer) {
+                sendErrorMessage(session, "Error: Observers cannot resign.");
+                return;
+            }
+            if (gameData.game().isGameOver()) {
+                sendErrorMessage(session, "Error: The game is already over.");
+                return;
+            }
+            game.game().setGameOver(true);
+            gameDAO.updateGame(game);
+
+
+            String message = String.format("%s has resigned. The game is over.", username);
+            NotificationMessage notification = new NotificationMessage(message);
+            connections.broadcast(gameId, session, notification);
+
+        } catch (DataAccessException e) {
+            sendErrorMessage(session,"Error: Database error - " + e.getMessage());
+        }
     }
 
     // helpers
