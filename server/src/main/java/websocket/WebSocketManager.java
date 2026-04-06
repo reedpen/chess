@@ -2,7 +2,6 @@ package websocket;
 
 import chess.ChessGame;
 import chess.ChessMove;
-import chess.ChessPiece;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.AuthDAO;
@@ -24,8 +23,6 @@ import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ErrorMessage;
 
-
-import javax.xml.crypto.Data;
 import java.io.IOException;
 
 public class WebSocketManager implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
@@ -58,9 +55,12 @@ public class WebSocketManager implements WsConnectHandler, WsMessageHandler, WsC
         try {
             UserGameCommand baseCommand = gson.fromJson(rawMessage, UserGameCommand.class);
 
-            // TODO: Validate auth token here using your UserService/AuthDAO.
-            // String username = getUsername(baseCommand.getAuthToken());
-            String username = "temp";
+            AuthData auth = authDAO.getAuth(baseCommand.getAuthToken());
+            if (auth == null) {
+                sendErrorMessage(session, "Error: Unauthorized");
+                return;
+            }
+            String username = auth.username();
 
             connections.saveSession(baseCommand.getGameID(), session);
 
@@ -204,7 +204,7 @@ public class WebSocketManager implements WsConnectHandler, WsMessageHandler, WsC
 
         try {
             GameData game = gameDAO.getGame(gameId);
-            if (gameData == null) {
+            if (game == null) {
                 sendErrorMessage(session, "Error: Game does not exist.");
                 return;
             }
@@ -213,7 +213,7 @@ public class WebSocketManager implements WsConnectHandler, WsMessageHandler, WsC
                 sendErrorMessage(session, "Error: Observers cannot resign.");
                 return;
             }
-            if (gameData.game().isGameOver()) {
+            if (game.game().isGameOver()) {
                 sendErrorMessage(session, "Error: The game is already over.");
                 return;
             }
@@ -223,7 +223,7 @@ public class WebSocketManager implements WsConnectHandler, WsMessageHandler, WsC
 
             String message = String.format("%s has resigned. The game is over.", username);
             NotificationMessage notification = new NotificationMessage(message);
-            connections.broadcast(gameId, session, notification);
+            connections.broadcast(gameId, null, notification);
 
         } catch (DataAccessException e) {
             sendErrorMessage(session,"Error: Database error - " + e.getMessage());
