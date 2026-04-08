@@ -18,7 +18,7 @@ import static ui.EscapeSequences.*;
 public class Postlogin {
 
     private final AuthData authData;
-    private List<GameData> gameCache = new java.util.ArrayList<>();
+    private final List<GameData> gameCache = new java.util.ArrayList<>();
     public Postlogin(AuthData authData) {
         this.authData = authData;
     }

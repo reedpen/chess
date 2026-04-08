@@ -5,25 +5,63 @@ import model.AuthData;
 import model.GameData;
 import requestsandresults.CreateGameRequest;
 import requestsandresults.JoinGameRequest;
+import ui.ServerMessageHandler;
 import ui.ServerFacade;
+import ui.WebSocketFacade;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import static ui.Board.printBlackBoard;
 import static ui.Board.printWhiteBoard;
 import static ui.EscapeSequences.*;
 import static ui.EscapeSequences.RESET_TEXT_COLOR;
 import static ui.EscapeSequences.SET_TEXT_COLOR_WHITE;
+import static websocket.messages.ServerMessage.ServerMessageType.*;
 
-public class Gameplay {
-    private final AuthData authData;
-    private List<GameData> gameCache = new java.util.ArrayList<>();
-    public Gameplay(AuthData authData) {
-        this.authData = authData;
+public class Gameplay implements ServerMessageHandler {
+
+    private final String authToken;
+    private final int gameId;
+    private final WebSocketFacade ws;
+
+    public Gameplay(String authToken, int gameId, String serverUrl) {
+        this.authToken = authToken;
+        this.gameId = gameId;
+
+        try {
+            this.ws = new WebSocketFacade(serverUrl, this);
+
+            this.ws.connect(authToken, gameId);
+        } catch (Exception e) {
+            System.out.println("Network error: " + e.getMessage());
+            this.ws = null;
+        }
     }
 
+
+    @Override
+    public void notify(ServerMessage message) {
+        switch (message.getServerMessageType()) {
+            case LOAD_GAME -> {
+                LoadGameMessage loadMsg = (LoadGameMessage) message;
+                System.out.println("\n[Board updated]");
+            }
+            case NOTIFICATION -> {
+                NotificationMessage notifMsg = (NotificationMessage) message;
+                System.out.println("\n" + notifMsg.getMessage());
+            }
+            case ERROR -> {
+                ErrorMessage errMsg = (ErrorMessage) message;
+                System.out.println("\n" + errMsg.getErrorMessage());
+            }
+        }
+
+    }
     public String eval(String input, ServerFacade server) {
         if (input == null || input.isBlank()) {
             return help();
@@ -35,19 +73,16 @@ public class Gameplay {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
 
             return switch (cmd) {
-                case "create" -> createGame(server, params);
-                case "logout" -> logout(server);
-                case "list" -> listGames(server);
-                case "join" -> joinGame(server, params);
-                case "observe" -> observeGame(server, params);
+                case "redraw" -> redrawBoard();
+                case "move" -> makeMove(params);
+                case "highlight" -> highlightLegalMoves(params);
+                case "resign" -> resign();
+                case "leave" -> leave();
                 case "help" -> help();
-                case "quit" -> "quit";
                 default -> "Unknown command: " + cmd + "\n" + help();
             };
         } catch (ResponseException ex) {
-            String message = ex.getMessage().substring(ex.getMessage().indexOf(":\":\"")-1);
-            String newMessage = message.substring(0, message.indexOf("\""));
-            return newMessage;
+            return ex.getMessage();
         }
     }
 
@@ -71,100 +106,27 @@ public class Gameplay {
                 SET_TEXT_COLOR_WHITE, RESET_TEXT_COLOR);
     }
 
-    public String joinGame(ServerFacade server, String... params) throws ResponseException {
-        if (params.length != 2) {
-            throw new ResponseException(400, "Invalid arguments. Usage: join <WHITE|BLACK> <LIST_INDEX>");
-        }
 
-        String colorInput = params[0].toUpperCase();
-        if (!colorInput.equals("WHITE") && !colorInput.equals("BLACK")) {
-            throw new ResponseException(400, "Invalid color: " + colorInput + ". Must be 'WHITE' or 'BLACK'.");
-        }
-        GameData gameData = getGameFromCache(params[1]);
-        int actualGameID = gameData.gameID();
-        server.joinGame(authData, new JoinGameRequest(colorInput, actualGameID));
+    // call websocketfacade
 
-        if (colorInput.equals("WHITE")) {
-            printWhiteBoard(gameData.game().getBoard());
-        } else {
-            printBlackBoard(gameData.game().getBoard());
-        }
-
-        return String.format("Successfully joined game '%s' as %s.", gameData.gameName(), colorInput);
+    private String redrawBoard() {
+        return toString();
     }
 
-    public String observeGame(ServerFacade server, String... params) throws ResponseException {
-        if (params.length != 1) {
-            throw new ResponseException(400, "Invalid arguments. Usage: observe <LIST_INDEX>");
-        }
-
-        GameData gameData = getGameFromCache(params[0]);
-        printWhiteBoard(gameData.game().getBoard());
-
-        return String.format("Now observing game: %s (Index: %s)", gameData.gameName(), params[0]);
+    private String makeMove() {
+        return toString();
     }
 
-    public String listGames(ServerFacade server) throws ResponseException {
-        Collection<GameData> games = server.listGames(authData).games();
-        gameCache.clear();
-
-        if (games == null || games.isEmpty()) {
-            return "No active games found on server.";
-        }
-
-        gameCache.addAll(games);
-
-        StringBuilder sb = new StringBuilder("--- Active Games ---\n");
-        for (int i = 0; i < gameCache.size(); i++) {
-            GameData game = gameCache.get(i);
-            int displayIndex = i + 1;
-
-            sb.append(String.format("[%d] %-15s | White: %-10s | Black: %-10s\n",
-                    displayIndex,
-                    game.gameName(),
-                    formatUser(game.whiteUsername()),
-                    formatUser(game.blackUsername())));
-        }
-        return sb.toString();
+    private String highlightLegalMoves() {
+        return toString();
     }
 
-    public String logout(ServerFacade server) throws ResponseException {
-        server.logout(authData);
-
-        return "Logged out successfully.";
+    private String resign() {
+        return toString();
     }
 
-    public String createGame(ServerFacade server, String... params) throws ResponseException {
-        if (params.length < 1) {
-            throw new ResponseException(400, "Invalid arguments. Usage: create <NAME>");
-        }
-
-        String gameName = String.join(" ", params);
-        if (gameName.isBlank()) {
-            throw new ResponseException(400, "Game name cannot be empty.");
-        }
-
-        server.createGame(authData, new CreateGameRequest(gameName));
-        return "Game '" + gameName + "' created.";
+    private String leave() {
+        return toString();
     }
 
-
-    private String formatUser(String user) {
-        return (user == null || user.isBlank()) ? "---" : user;
-    }
-
-    private GameData getGameFromCache(String indexStr) throws ResponseException {
-        int index;
-        try {
-            index = Integer.parseInt(indexStr) - 1;
-        } catch (NumberFormatException e) {
-            throw new ResponseException(400, "Error: Please provide a valid list number (e.g., 1).");
-        }
-
-        if (index < 0 || index >= gameCache.size()) {
-            throw new ResponseException(400, "Error: No game found at index " + (index + 1) + ". Run 'list' to see current options.");
-        }
-
-        return gameCache.get(index);
-    }
 }

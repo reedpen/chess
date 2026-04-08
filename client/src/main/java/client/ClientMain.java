@@ -2,7 +2,9 @@ package client;
 
 import chess.*;
 import model.AuthData;
+import ui.NotificationHandler;
 import ui.ServerFacade;
+import websocket.messages.NotificationMessage;
 
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
@@ -12,10 +14,11 @@ public class ClientMain {
     private Postlogin postlogin;
     private AuthData currentAuth = null;
 
-    public ClientMain(String serverUrl) {
+    public ClientMain (String serverUrl) {
         this.server = new ServerFacade(serverUrl);
         this.prelogin = new Prelogin(this);
     }
+
 
     public static void main(String[] args) {
         ClientMain repl = new ClientMain("http://localhost:8080");
