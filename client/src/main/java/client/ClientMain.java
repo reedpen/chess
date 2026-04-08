@@ -51,6 +51,8 @@ public class ClientMain {
 
             try {
                 if (gameplay != null) {
+
+                    System.out.println("[TEAM "+gameplay.getCurrentTurn() +"'s TURN");
                     result = gameplay.eval(line);
                     if ("LEAVE".equals(result)) {
                         gameplay = null;

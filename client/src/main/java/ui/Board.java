@@ -32,6 +32,10 @@ public class Board {
 
     public static void printWhiteBoardHighlight(ChessBoard board, ChessPosition piecePos) {
         ChessPiece piece = board.getPiece(piecePos);
+        if (piece == null) {
+            System.out.println("Error: Selected position is empty.");
+            return;
+        }
         Collection<ChessMove> moves = piece.pieceMoves(board, piecePos);
         Collection<ChessPosition> movePosSet = new HashSet<>();
         for (ChessMove move : moves) {

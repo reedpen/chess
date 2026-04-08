@@ -181,6 +181,9 @@ public class Gameplay implements ServerMessageHandler {
         return "";
     }
     private String resign() throws ResponseException {
+        if (currentGame.isGameOver()){
+            return "Error: Game already over";
+        }
         if (playerColor == null) {
             return "Error: Observers cannot resign.";
         }
@@ -233,6 +236,10 @@ public class Gameplay implements ServerMessageHandler {
             case "knight", "n" -> ChessPiece.PieceType.KNIGHT;
             default -> null;
         };
+    }
+
+    public String getCurrentTurn() {
+        return currentGame.getTeamTurn().toString();
     }
     }
 

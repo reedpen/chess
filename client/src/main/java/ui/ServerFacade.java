@@ -89,23 +89,32 @@ public class ServerFacade {
 
 
     private <T> T executeRequest(HttpRequest request, Class<T> responseClass) throws ResponseException {
+        HttpResponse<String> response;
         try {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                if (responseClass == Void.class) {
-                    return null;
-                }
-
-                if (response.body() == null || response.body().isEmpty()) {
-                    return null;
-                }
-                return gson.fromJson(response.body(), responseClass);
-            } else {
-                throw new ResponseException(response.statusCode(), "Error: " + response.body());
-            }
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
             throw new ResponseException(500, "Network error: " + e.getMessage());
         }
+
+        if (response.statusCode() >= 200 && response.statusCode() < 300) {
+            if (responseClass == Void.class) {
+                return null;
+            }
+            if (response.body() == null || response.body().isEmpty()) {
+                return null;
+            }
+            return gson.fromJson(response.body(), responseClass);
+        }
+
+        else {
+            try {
+                java.util.Map responseMap = gson.fromJson(response.body(), java.util.Map.class);
+                if (responseMap != null && responseMap.containsKey("message")) {
+                    String cleanMessage = (String) responseMap.get("message");
+                    throw new ResponseException(response.statusCode(), cleanMessage);
+                }
+            } catch (com.google.gson.JsonSyntaxException ignored) {
+            }
+            throw new ResponseException(response.statusCode(), "Error: " + response.body());
+        }
     }
-}
