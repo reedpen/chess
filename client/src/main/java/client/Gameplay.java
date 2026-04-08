@@ -1,6 +1,7 @@
 package client;
 
 import chess.ChessGame;
+import chess.ChessPosition;
 import chess.ResponseException;
 import model.AuthData;
 import model.GameData;
@@ -15,10 +16,8 @@ import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
-import java.util.Collection;
 
-import static ui.Board.printBlackBoard;
-import static ui.Board.printWhiteBoard;
+import static ui.Board.*;
 import static ui.EscapeSequences.*;
 import static ui.EscapeSequences.RESET_TEXT_COLOR;
 import static ui.EscapeSequences.SET_TEXT_COLOR_WHITE;
@@ -130,8 +129,18 @@ public class Gameplay implements ServerMessageHandler {
         return toString();
     }
 
-    private String highlightLegalMoves() {
-        return toString();
+    private String highlightLegalMoves(ChessPosition pos) {
+        if (currentGame == null) {
+            return "Board has not loaded yet.";
+        }
+
+        if ("BLACK".equalsIgnoreCase(String.valueOf(playerColor))) {
+            printBlackBoardHighlight(currentGame.getBoard(), pos);
+        } else {
+            printWhiteBoardHighlight(currentGame.getBoard(), pos);
+        }
+        return "";
+    }
     }
 
     private String resign() throws ResponseException {
