@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import chess.ResponseException;
 import model.AuthData;
 import model.GameData;
@@ -28,19 +29,22 @@ public class Gameplay implements ServerMessageHandler {
     private final String authToken;
     private final int gameId;
     private final WebSocketFacade ws;
+    private ChessGame currentGame;
+    private final ChessGame.TeamColor playerColor;
 
-    public Gameplay(String authToken, int gameId, String serverUrl) {
+    public Gameplay(String authToken, int gameId, ChessGame.TeamColor playerColor String serverUrl) {
         this.authToken = authToken;
         this.gameId = gameId;
-
+        this.playerColor = playerColor;
+        WebSocketFacade tempWs = null;
         try {
-            this.ws = new WebSocketFacade(serverUrl, this);
+            tempWs = new WebSocketFacade(serverUrl, this);
 
-            this.ws.connect(authToken, gameId);
+            tempWs.connect(authToken, gameId);
         } catch (Exception e) {
             System.out.println("Network error: " + e.getMessage());
-            this.ws = null;
         }
+        this.ws = tempWs;
     }
 
 
