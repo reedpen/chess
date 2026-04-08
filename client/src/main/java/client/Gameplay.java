@@ -114,7 +114,17 @@ public class Gameplay implements ServerMessageHandler {
     // call websocketfacade
 
     private String redrawBoard() {
-        return toString();
+        if (currentGame == null) {
+            return "Board has not loaded yet.";
+        }
+
+        if ("BLACK".equalsIgnoreCase(String.valueOf(playerColor))) {
+            printBlackBoard(currentGame.getBoard());
+        } else {
+
+            printWhiteBoard(currentGame.getBoard());
+        }
+        return "";
     }
 
     private String makeMove() {
@@ -125,12 +135,14 @@ public class Gameplay implements ServerMessageHandler {
         return toString();
     }
 
-    private String resign() {
-        return toString();
+    private String resign() throws ResponseException {
+        ws.resign(authToken, gameId);
+        return "Resignation request sent.";
     }
 
-    private String leave() {
-        return toString();
+    private String leave() throws ResponseException {
+        ws.leaveGame(authToken, gameId);dd
+        return "LEAVE";
     }
 
 }

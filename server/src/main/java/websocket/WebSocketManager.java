@@ -161,6 +161,7 @@ public class WebSocketManager implements WsConnectHandler, WsMessageHandler, WsC
                     connections.broadcast(gameId, null, new NotificationMessage("Game has reached a stalemate."));
                 }
             }
+            else { sendErrorMessage(session, "Error: out of turn or observer"); }
 
         } catch (DataAccessException e){
             sendErrorMessage(session, "Error: Database error - " + e.getMessage());
