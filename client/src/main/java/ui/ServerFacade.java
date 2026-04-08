@@ -87,7 +87,6 @@ public class ServerFacade {
     }
 
 
-
     private <T> T executeRequest(HttpRequest request, Class<T> responseClass) throws ResponseException {
         HttpResponse<String> response;
         try {
@@ -104,9 +103,7 @@ public class ServerFacade {
                 return null;
             }
             return gson.fromJson(response.body(), responseClass);
-        }
-
-        else {
+        } else {
             try {
                 java.util.Map responseMap = gson.fromJson(response.body(), java.util.Map.class);
                 if (responseMap != null && responseMap.containsKey("message")) {
@@ -118,3 +115,4 @@ public class ServerFacade {
             throw new ResponseException(response.statusCode(), "Error: " + response.body());
         }
     }
+}
