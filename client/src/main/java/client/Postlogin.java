@@ -1,9 +1,7 @@
 package client;
 
-import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
-import org.eclipse.jetty.io.ssl.ALPNProcessor;
 import requestsandresults.*;
 import chess.ResponseException;
 import ui.ServerFacade;
@@ -12,8 +10,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import static ui.Board.printBlackBoard;
-import static ui.Board.printWhiteBoard;
 import static ui.EscapeSequences.*;
 
 public class Postlogin {

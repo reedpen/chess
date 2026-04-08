@@ -2,14 +2,11 @@ package ui;
 import com.google.gson.Gson;
 import chess.ResponseException;
 import jakarta.websocket.*;
-import org.eclipse.jetty.http.HttpTester;
 import websocket.messages.*;
 import websocket.commands.*;
 import websocket.messages.ServerMessage;
 import chess.ChessMove;
 import java.io.IOException;
-
-import ui.ServerMessageHandler;
 
 import java.net.URI;
 import java.net.URISyntaxException;

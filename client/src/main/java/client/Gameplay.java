@@ -1,13 +1,7 @@
 package client;
 
 import chess.*;
-import model.AuthData;
-import model.GameData;
-import org.eclipse.jetty.server.Response;
-import requestsandresults.CreateGameRequest;
-import requestsandresults.JoinGameRequest;
 import ui.ServerMessageHandler;
-import ui.ServerFacade;
 import ui.WebSocketFacade;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
