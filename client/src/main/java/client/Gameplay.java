@@ -130,9 +130,13 @@ public class Gameplay implements ServerMessageHandler {
         ChessPosition start = parsePosition(params[0]);
         ChessPosition end = parsePosition(params[1]);
 
-        if (currentGame == null) return "Error: Game board hasn't loaded yet.";
+        if (currentGame == null){
+            return "Error: Game board hasn't loaded yet.";
+        }
         ChessPiece piece = currentGame.getBoard().getPiece(start);
-        if (piece == null) return "Error: No piece at starting position.";
+        if (piece == null){
+            return "Error: No piece at starting position.";
+        }
 
         boolean isPawn = piece.getPieceType() == ChessPiece.PieceType.PAWN;
         boolean isPromotionRank = (piece.getTeamColor() == ChessGame.TeamColor.WHITE && end.getRow() == 8) ||
@@ -218,7 +222,9 @@ public class Gameplay implements ServerMessageHandler {
     }
 
     private ChessPiece.PieceType parsePromotionPiece(String pieceStr) {
-        if (pieceStr == null) return null;
+        if (pieceStr == null) {
+            return null;
+        }
 
         return switch (pieceStr.toLowerCase()) {
             case "queen", "q" -> ChessPiece.PieceType.QUEEN;
