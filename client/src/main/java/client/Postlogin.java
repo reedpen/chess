@@ -96,7 +96,7 @@ public class Postlogin {
 
         GameData gameData = getGameFromCache(params[0]);
         int actualGameID = gameData.gameID();
-        server.joinGame(authData, new JoinGameRequest(null, actualGameID));
+
 
         client.enterGameplay(actualGameID, null);
 
