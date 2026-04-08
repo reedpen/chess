@@ -1,19 +1,15 @@
 package ui;
 import com.google.gson.Gson;
 import chess.ResponseException;
+import jakarta.websocket.*;
 import org.eclipse.jetty.http.HttpTester;
 import websocket.messages.*;
 import websocket.commands.*;
 import websocket.messages.ServerMessage;
 import chess.ChessMove;
 import java.io.IOException;
-import jakarta.websocket.ContainerProvider;
-import jakarta.websocket.DeploymentException;
-import jakarta.websocket.Endpoint;
-import jakarta.websocket.EndpointConfig;
+
 import ui.ServerMessageHandler;
-import jakarta.websocket.Session;
-import jakarta.websocket.WebSocketContainer;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -33,7 +29,7 @@ public class WebSocketFacade extends Endpoint {
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
 
-            this.session.addMessageHandler(new ServerMessageHandler.Whole<String>() {
+            this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
                     try {
