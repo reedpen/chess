@@ -22,7 +22,6 @@ import static ui.Board.printWhiteBoard;
 import static ui.EscapeSequences.*;
 import static ui.EscapeSequences.RESET_TEXT_COLOR;
 import static ui.EscapeSequences.SET_TEXT_COLOR_WHITE;
-import static websocket.messages.ServerMessage.ServerMessageType.*;
 
 public class Gameplay implements ServerMessageHandler {
 
@@ -127,7 +126,7 @@ public class Gameplay implements ServerMessageHandler {
         return "";
     }
 
-    private String makeMove() {
+    private String makeMove(String param) {
         return toString();
     }
 
