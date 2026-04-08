@@ -9,6 +9,7 @@ import io.javalin.*;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
+import websocket.WebSocketManager;
 
 public class Server {
 
@@ -30,6 +31,8 @@ public class Server {
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
+        WebSocketManager webSocketHandler = new WebSocketManager(authDAO, gameDAO);
+
         javalin.post("/user", userHandler::register);
         javalin.post("/session", userHandler::login);
         javalin.delete("/session", userHandler::logout);
@@ -38,6 +41,12 @@ public class Server {
         javalin.put("/game", gameHandler::joinGame);
         javalin.delete("/db", clearHandler::clear);
 
+
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(webSocketHandler);
+            ws.onMessage(webSocketHandler);
+            ws.onClose(webSocketHandler);
+        });
         // Register your endpoints and exception handlers here.
         javalin.exception(ResponseException.class, (ex, ctx) -> {
             ctx.status(ex.statusCode());
