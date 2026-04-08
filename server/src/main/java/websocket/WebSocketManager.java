@@ -2,6 +2,7 @@ package websocket;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPosition;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.AuthDAO;
@@ -137,26 +138,26 @@ public class WebSocketManager implements WsConnectHandler, WsMessageHandler, WsC
                     sendErrorMessage(session, "Error: Invalid move" + e.getMessage());return;
                 }
                 gameDAO.updateGame(game);
-                // update all sessions with new board
-                LoadGameMessage loadMessage = new LoadGameMessage(game.game());
-                String jsonLoadMessage = new Gson().toJson(loadMessage);
-                for (Session s : connections.connections.get(gameId)) {
-                    if (s.isOpen()) {
-                        s.getRemote().sendString(jsonLoadMessage);
-                    }
-                }
-                String message = String.format("%s moved from %s to %s.", username, move.getStartPosition(), move.getEndPosition());
+                ChessGame.TeamColor opposingColor = (color == ChessGame.TeamColor.WHITE) ?
+                        ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+
+                String opponentName = (opposingColor == ChessGame.TeamColor.WHITE) ?
+                        game.whiteUsername() : game.blackUsername();
+                connections.broadcast(gameId, null, new LoadGameMessage(game.game()));
+
+                String startPos = getMoveNotation(move.getStartPosition());
+                String endPos = getMoveNotation(move.getEndPosition());
+                String message = String.format("%s moved from %s to %s.", username, startPos, endPos);
                 NotificationMessage notification = new NotificationMessage(message);
                 connections.broadcast(gameId, session, notification);
 
                 // check game end conditions
-                ChessGame.TeamColor opposingColor = (color == ChessGame.TeamColor.WHITE) ?
-                        ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+
 
                 if (game.game().isInCheckmate(opposingColor)) {
-                    connections.broadcast(gameId, null, new NotificationMessage(opposingColor.toString() + " is in checkmate."));
+                    connections.broadcast(gameId, null, new NotificationMessage(opponentName + " is in checkmate."));
                 } else if (game.game().isInCheck(opposingColor)) {
-                    connections.broadcast(gameId, null, new NotificationMessage(opposingColor.toString() + " is in check."));
+                    connections.broadcast(gameId, null, new NotificationMessage(opponentName + " is in check."));
                 } else if (game.game().isInStalemate(opposingColor)) {
                     connections.broadcast(gameId, null, new NotificationMessage("Game has reached a stalemate."));
                 }
@@ -240,5 +241,10 @@ public class WebSocketManager implements WsConnectHandler, WsMessageHandler, WsC
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private String getMoveNotation(ChessPosition pos) {
+        char col = (char) ('a' + pos.getColumn() - 1);
+        return col + String.valueOf(pos.getRow());
     }
 }
