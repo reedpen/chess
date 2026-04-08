@@ -1,10 +1,9 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -27,6 +26,34 @@ public class Board {
         System.out.println();
         printBorder(BLACK_COLS);
         printBoard(board, false);
+        printBorder(BLACK_COLS);
+        System.out.println();
+    }
+
+    public static void printWhiteBoardHighlight(ChessBoard board, ChessPosition piecePos) {
+        ChessPiece piece = board.getPiece(piecePos);
+        Collection<ChessMove> moves = piece.pieceMoves(board, piecePos);
+        Collection<ChessPosition> movePosSet = new HashSet<>();
+        for (ChessMove move : moves) {
+            movePosSet.add(move.getEndPosition());
+        }
+        System.out.println();
+        printBorder(WHITE_COLS);
+        printBoardHighlighted(board, true, movePosSet, piecePos);
+        printBorder(WHITE_COLS);
+        System.out.println();
+    }
+
+    public static void printBlackBoardHighlight(ChessBoard board, ChessPosition piecePos) {
+        ChessPiece piece = board.getPiece(piecePos);
+        Collection<ChessMove> moves = piece.pieceMoves(board, piecePos);
+        Collection<ChessPosition> movePosSet = new HashSet<>();
+        for (ChessMove move : moves) {
+            movePosSet.add(move.getEndPosition());
+        }
+        System.out.println();
+        printBorder(BLACK_COLS);
+        printBoardHighlighted(board, false, movePosSet, piecePos);
         printBorder(BLACK_COLS);
         System.out.println();
     }
@@ -69,7 +96,7 @@ public class Board {
         }
     }
 
-    public static void printBoardHighlighted(ChessBoard board, boolean white, Set<ChessPosition> positionSet, ChessPosition selectedPos) {
+    public static void printBoardHighlighted(ChessBoard board, boolean white, Collection<ChessPosition> positionSet, ChessPosition selectedPos) {
         int startRow = white ? 8 : 1;
         int endRow   = white ? 0 : 9;
         int rowStep  = white ? -1 : 1;
@@ -123,5 +150,4 @@ public class Board {
         return textColor + symbol;
     }
 
-    private static String
 }
