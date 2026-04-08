@@ -31,9 +31,7 @@ public class Prelogin{
                 default -> help();
             };
         } catch (ResponseException ex) {
-            String message = ex.getMessage().substring(ex.getMessage().indexOf(":\":\"")-1);
-            String newMessage = message.substring(0, message.indexOf("\"")-1);
-            return newMessage;
+            return ex.getMessage();
         }
     }
 

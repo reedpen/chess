@@ -87,6 +87,7 @@ public class Board {
 
                 boolean isLightSquare = (row + col) % 2 != 0;
                 String bgColor = isLightSquare ? SET_BG_COLOR_LIGHT_GREY : SET_BG_COLOR_DARK_GREY;
+
                 String pieceStr = getPieceString(piece);
 
                 System.out.print(bgColor + pieceStr);

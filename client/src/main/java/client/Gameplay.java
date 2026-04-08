@@ -28,9 +28,9 @@ public class Gameplay implements ServerMessageHandler {
     private final int gameId;
     private final WebSocketFacade ws;
     private ChessGame currentGame;
-    private final ChessGame.TeamColor playerColor;
+    private final String playerColor;
 
-    public Gameplay(String authToken, int gameId, ChessGame.TeamColor playerColor, String serverUrl) {
+    public Gameplay(String authToken, int gameId, String playerColor, String serverUrl) {
         this.authToken = authToken;
         this.gameId = gameId;
         this.playerColor = playerColor;
@@ -63,7 +63,7 @@ public class Gameplay implements ServerMessageHandler {
                 System.out.println("\n" + errMsg.getErrorMessage());
             }
         }
-
+        System.out.print(SET_TEXT_COLOR_BLUE + "\n[IN GAME] " + SET_TEXT_COLOR_WHITE + ">>> " + RESET_TEXT_COLOR);
     }
     public String eval(String input) {
         if (input == null || input.isBlank()) {
@@ -94,7 +94,7 @@ public class Gameplay implements ServerMessageHandler {
             %s--- COMMANDS ---%s
             %sredraw%s                   - redraws the chess board
             %smove <LETTER NUMBER>%s     - perform a chess move
-            %shighlight <LETTER NUMBER>%s- join as WHITE or BLACK
+            %shighlight <LETTER NUMBER>%s- show all legal moves for a piece
             %sresign%s                   - forfeit game
             %sleave%s                    - remove current user from game
             %shelp%s                     - show this menu
@@ -117,16 +117,18 @@ public class Gameplay implements ServerMessageHandler {
             return "Board has not loaded yet.";
         }
 
-        if ("BLACK".equalsIgnoreCase(String.valueOf(playerColor))) {
+        if ("BLACK".equalsIgnoreCase(playerColor)) {
             printBlackBoard(currentGame.getBoard());
         } else {
-
             printWhiteBoard(currentGame.getBoard());
         }
         return "";
     }
 
     private String makeMove(String... params) throws ResponseException {
+        if (playerColor == null) {
+            return "Error: Observers cannot make moves.";
+        }
         if (params.length < 2 || params.length > 3) {
             return "Usage: move <STARTING_POS> <ENDING_POS> <PROMO_PIECE> (e.g. 'move e7 e8 queen')";
         }
@@ -173,7 +175,7 @@ public class Gameplay implements ServerMessageHandler {
             return "Board has not loaded yet.";
         }
 
-        if ("BLACK".equalsIgnoreCase(String.valueOf(playerColor))) {
+        if ("BLACK".equalsIgnoreCase(playerColor)) {
             printBlackBoardHighlight(currentGame.getBoard(), pos);
         } else {
             printWhiteBoardHighlight(currentGame.getBoard(), pos);
@@ -181,8 +183,19 @@ public class Gameplay implements ServerMessageHandler {
         return "";
     }
     private String resign() throws ResponseException {
-        ws.resign(authToken, gameId);
-        return "Resignation request sent.";
+        if (playerColor == null) {
+            return "Error: Observers cannot resign.";
+        }
+        System.out.print(SET_TEXT_COLOR_RED + "Are you sure you want to forfeit the game? (y/n): " + RESET_TEXT_COLOR);
+        Scanner scanner = new Scanner(System.in);
+        String confirmation = scanner.nextLine().trim().toLowerCase();
+
+        if (confirmation.equals("y") || confirmation.equals("yes")) {
+            ws.resign(authToken, gameId);
+            return "Resignation request sent.";
+        } else {
+            return "Resignation cancelled. Returning to game.";
+        }
     }
 
     private String leave() throws ResponseException {

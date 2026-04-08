@@ -3,6 +3,7 @@ package client;
 import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
+import org.eclipse.jetty.io.ssl.ALPNProcessor;
 import requestsandresults.*;
 import chess.ResponseException;
 import ui.ServerFacade;
@@ -18,9 +19,11 @@ import static ui.EscapeSequences.*;
 public class Postlogin {
 
     private final AuthData authData;
+    private final ClientMain client;
     private final List<GameData> gameCache = new java.util.ArrayList<>();
-    public Postlogin(AuthData authData) {
+    public Postlogin(AuthData authData, ClientMain client) {
         this.authData = authData;
+        this.client = client;
     }
 
     public String eval(String input, ServerFacade server) {
@@ -44,9 +47,7 @@ public class Postlogin {
                 default -> "Unknown command: " + cmd + "\n" + help();
             };
         } catch (ResponseException ex) {
-            String message = ex.getMessage().substring(ex.getMessage().indexOf(":\":\"")-1);
-            String newMessage = message.substring(0, message.indexOf("\""));
-            return newMessage;
+          return ex.getMessage();
         }
     }
 
@@ -82,13 +83,11 @@ public class Postlogin {
         }
         GameData gameData = getGameFromCache(params[1]);
         int actualGameID = gameData.gameID();
+
         server.joinGame(authData, new JoinGameRequest(colorInput, actualGameID));
 
-        if (colorInput.equals("WHITE")) {
-            printWhiteBoard(gameData.game().getBoard());
-        } else {
-            printBlackBoard(gameData.game().getBoard());
-        }
+        client.enterGameplay(actualGameID, colorInput);
+
 
         return String.format("Joining game '%s' as %s.", gameData.gameName(), colorInput);
     }
@@ -98,8 +97,12 @@ public class Postlogin {
             throw new ResponseException(400, "Invalid arguments. Usage: observe <LIST_INDEX>");
         }
 
+
         GameData gameData = getGameFromCache(params[0]);
-        printWhiteBoard(gameData.game().getBoard());
+        int actualGameID = gameData.gameID();
+        server.joinGame(authData, new JoinGameRequest(null, actualGameID));
+
+        client.enterGameplay(actualGameID, null);
 
         return String.format("Now observing game: %s (Index: %s)", gameData.gameName(), params[0]);
     }
