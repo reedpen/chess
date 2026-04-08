@@ -90,7 +90,7 @@ public class Postlogin {
             printBlackBoard(gameData.game().getBoard());
         }
 
-        return String.format("Successfully joined game '%s' as %s.", gameData.gameName(), colorInput);
+        return String.format("Joining game '%s' as %s.", gameData.gameName(), colorInput);
     }
 
     public String observeGame(ServerFacade server, String... params) throws ResponseException {

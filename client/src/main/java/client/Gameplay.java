@@ -3,6 +3,7 @@ package client;
 import chess.*;
 import model.AuthData;
 import model.GameData;
+import org.eclipse.jetty.server.Response;
 import requestsandresults.CreateGameRequest;
 import requestsandresults.JoinGameRequest;
 import ui.ServerMessageHandler;
@@ -29,7 +30,7 @@ public class Gameplay implements ServerMessageHandler {
     private ChessGame currentGame;
     private final ChessGame.TeamColor playerColor;
 
-    public Gameplay(String authToken, int gameId, ChessGame.TeamColor playerColor String serverUrl) {
+    public Gameplay(String authToken, int gameId, ChessGame.TeamColor playerColor, String serverUrl) {
         this.authToken = authToken;
         this.gameId = gameId;
         this.playerColor = playerColor;
@@ -50,7 +51,8 @@ public class Gameplay implements ServerMessageHandler {
         switch (message.getServerMessageType()) {
             case LOAD_GAME -> {
                 LoadGameMessage loadMsg = (LoadGameMessage) message;
-                System.out.println("\n[Board updated]");
+                this.currentGame = loadMsg.getGame();
+                redrawBoard();
             }
             case NOTIFICATION -> {
                 NotificationMessage notifMsg = (NotificationMessage) message;
@@ -63,7 +65,7 @@ public class Gameplay implements ServerMessageHandler {
         }
 
     }
-    public String eval(String input, ServerFacade server) {
+    public String eval(String input) {
         if (input == null || input.isBlank()) {
             return help();
         }
@@ -124,7 +126,7 @@ public class Gameplay implements ServerMessageHandler {
         return "";
     }
 
-    private String makeMove(String... params) {
+    private String makeMove(String... params) throws ResponseException {
         if (params.length < 2 || params.length > 3) {
             return "Usage: move <STARTING_POS> <ENDING_POS> <PROMO_PIECE> (e.g. 'move e7 e8 queen')";
         }
@@ -162,7 +164,7 @@ public class Gameplay implements ServerMessageHandler {
         return "Move command sent.";
     }
 
-    private String highlightLegalMoves(String... params) {
+    private String highlightLegalMoves(String... params) throws ResponseException {
         if (params.length != 1) {
             return "Usage: highlight <POSITION> (e.g. 'highlight e2')";
         }

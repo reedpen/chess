@@ -2,9 +2,7 @@ package client;
 
 import chess.*;
 import model.AuthData;
-import ui.NotificationHandler;
 import ui.ServerFacade;
-import websocket.messages.NotificationMessage;
 
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
@@ -13,10 +11,14 @@ public class ClientMain {
     private final Prelogin prelogin;
     private Postlogin postlogin;
     private AuthData currentAuth = null;
-
+    private Gameplay gameplay;
+    private final String serverUrl;
     public ClientMain (String serverUrl) {
         this.server = new ServerFacade(serverUrl);
         this.prelogin = new Prelogin(this);
+        this.serverUrl = serverUrl;
+
+
     }
 
 
@@ -40,6 +42,13 @@ public class ClientMain {
             String line = scanner.nextLine();
 
             try {
+                if (gameplay != null) {
+                    result = gameplay.eval(line);
+                    if ("LEAVE".equals(result)) {
+                        gameplay = null;
+                        result = "Returned to Post-Login menu.";
+                    }
+                    }
                 if (currentAuth == null) {
                     result = prelogin.eval(line, server);
                 } else {
@@ -52,6 +61,7 @@ public class ClientMain {
                 if (result != null && result.contains("Logged out")) {
                     currentAuth = null;
                     postlogin = null;
+                    gameplay = null;
                 }
 
             } catch (Throwable e) {
@@ -63,6 +73,9 @@ public class ClientMain {
     public void setAuthData(AuthData authData) {
         this.currentAuth = authData;
         this.postlogin = new Postlogin(this.currentAuth);
+    }
+    public void enterGameplay(int gameId, ChessGame.TeamColor playerColor) {
+        this.gameplay = new Gameplay(currentAuth.authToken(), gameId, playerColor, this.serverUrl);
     }
 
 }
