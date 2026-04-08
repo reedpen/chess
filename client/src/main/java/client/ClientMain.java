@@ -52,13 +52,14 @@ public class ClientMain {
             try {
                 if (gameplay != null) {
 
-                    System.out.println("[TEAM "+gameplay.getCurrentTurn() +"'s TURN");
                     result = gameplay.eval(line);
                     if ("LEAVE".equals(result)) {
                         gameplay = null;
                         result = "Returned to Post-Login menu.";
                     }
-                    }
+                    System.out.println("["+gameplay.getCurrentTurn() +"'s TURN]" + SET_TEXT_BLINKING);
+
+                }
                 else if (currentAuth == null) {
                     result = prelogin.eval(line, server);
                 } else {
