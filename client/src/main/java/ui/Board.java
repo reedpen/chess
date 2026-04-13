@@ -30,13 +30,14 @@ public class Board {
         System.out.println();
     }
 
-    public static void printWhiteBoardHighlight(ChessBoard board, ChessPosition piecePos) {
+    public static void printWhiteBoardHighlight(ChessGame game, ChessPosition piecePos) {
+        ChessBoard board = game.getBoard();
         ChessPiece piece = board.getPiece(piecePos);
         if (piece == null) {
             System.out.println("Error: Selected position is empty.");
             return;
         }
-        Collection<ChessMove> moves = piece.pieceMoves(board, piecePos);
+        Collection<ChessMove> moves = game.validMoves(piecePos);
         Collection<ChessPosition> movePosSet = new HashSet<>();
         for (ChessMove move : moves) {
             movePosSet.add(move.getEndPosition());
@@ -48,9 +49,14 @@ public class Board {
         System.out.println();
     }
 
-    public static void printBlackBoardHighlight(ChessBoard board, ChessPosition piecePos) {
+    public static void printBlackBoardHighlight(ChessGame game, ChessPosition piecePos) {
+        ChessBoard board = game.getBoard();
         ChessPiece piece = board.getPiece(piecePos);
-        Collection<ChessMove> moves = piece.pieceMoves(board, piecePos);
+        if (piece == null) {
+            System.out.println("Error: Selected position is empty.");
+            return;
+        }
+        Collection<ChessMove> moves = game.validMoves(piecePos);
         Collection<ChessPosition> movePosSet = new HashSet<>();
         for (ChessMove move : moves) {
             movePosSet.add(move.getEndPosition());

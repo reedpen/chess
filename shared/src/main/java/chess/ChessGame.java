@@ -110,7 +110,7 @@ public class ChessGame {
                 board.addPiece(move.startPos, null);
                 changeTeam();
 
-                if (isInCheck(currentTeam) || isInStalemate(currentTeam)) {
+                if (isInCheckmate(currentTeam) || isInStalemate(currentTeam)) {
                     setGameOver(true);
                 }
             }

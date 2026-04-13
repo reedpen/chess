@@ -135,7 +135,8 @@ public class WebSocketManager implements WsConnectHandler, WsMessageHandler, WsC
                     game.game().makeMove(move);
 
                 } catch (InvalidMoveException e) {
-                    sendErrorMessage(session, "Error: Invalid move" + e.getMessage());return;
+                    sendErrorMessage(session, "Error: Invalid move");
+                    return;
                 }
                 gameDAO.updateGame(game);
                 ChessGame.TeamColor opposingColor = (color == ChessGame.TeamColor.WHITE) ?

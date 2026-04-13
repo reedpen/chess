@@ -57,7 +57,6 @@ public class ClientMain {
                         gameplay = null;
                         result = "Returned to Post-Login menu.";
                     }
-                    System.out.println("["+gameplay.getCurrentTurn() +"'s TURN]" + SET_TEXT_BLINKING);
 
                 }
                 else if (currentAuth == null) {

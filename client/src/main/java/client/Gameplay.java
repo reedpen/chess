@@ -174,9 +174,9 @@ public class Gameplay implements ServerMessageHandler {
         }
 
         if ("BLACK".equalsIgnoreCase(playerColor)) {
-            printBlackBoardHighlight(currentGame.getBoard(), pos);
+            printBlackBoardHighlight(currentGame, pos);
         } else {
-            printWhiteBoardHighlight(currentGame.getBoard(), pos);
+            printWhiteBoardHighlight(currentGame, pos);
         }
         return "";
     }
